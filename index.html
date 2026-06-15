@@ -1,11 +1,912 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
+    <title>小妖的洞府</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+QingKe+HuangYou&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['ZCOOL QingKe HuangYou', 'cursive'],
+                        body: ['Noto Sans SC', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ====== CSS 变量 ====== */
+        :root {
+            --bg: #070d0a;
+            --bg-light: #0d1a14;
+            --fg: #e2ebe5;
+            --fg-muted: #7a8f82;
+            --accent: #00ff88;
+            --accent2: #ff6b35;
+            --card: rgba(13, 26, 20, 0.75);
+            --border: rgba(0, 255, 136, 0.12);
+            --glow: rgba(0, 255, 136, 0.25);
+        }
+
+        /* ====== 全局重置 ====== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            overflow-x: hidden;
+        }
+
+        /* ====== 自定义滚动条 ====== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+        /* ====== 粒子画布 ====== */
+        #particles-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ====== 鼠标光晕 ====== */
+        #mouse-glow {
+            position: fixed;
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,255,136,0.07) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 1;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s;
+            will-change: left, top;
+        }
+
+        /* ====== 渐变文字动画 ====== */
+        .gradient-text {
+            background: linear-gradient(135deg, #00ff88, #ff6b35, #00ff88);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 4s ease infinite;
+        }
+        @keyframes gradientShift {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* ====== 导航滚动样式 ====== */
+        .nav-scrolled {
+            background: rgba(7, 13, 10, 0.88) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border-bottom: 1px solid var(--border) !important;
+        }
+
+        /* ====== 导航链接悬浮 ====== */
+        .nav-link {
+            position: relative;
+            color: var(--fg-muted);
+            transition: color 0.3s ease;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover { color: var(--accent); }
+        .nav-link:hover::after { width: 100%; }
+
+        /* ====== 光斑装饰 ====== */
+        .glow-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.35;
+            pointer-events: none;
+            animation: blobFloat 10s ease-in-out infinite;
+        }
+        @keyframes blobFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33%  { transform: translate(30px, -25px) scale(1.1); }
+            66%  { transform: translate(-25px, 20px) scale(0.9); }
+        }
+
+        /* ====== 打字机光标 ====== */
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background: var(--accent);
+            margin-left: 2px;
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%      { opacity: 0; }
+        }
+
+        /* ====== 滚动提示箭头 ====== */
+        .scroll-hint { animation: bounceDown 2s ease-in-out infinite; }
+        @keyframes bounceDown {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(10px); }
+        }
+
+        /* ====== 入场揭示动画 ====== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ====== 3D 倾斜卡片 ====== */
+        .tilt-card {
+            transition: box-shadow 0.3s ease;
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+        .tilt-card:hover {
+            box-shadow: 0 20px 60px rgba(0, 255, 136, 0.08), 0 0 40px rgba(0, 255, 136, 0.04);
+        }
+        .article-cover { transition: transform 0.5s ease; }
+        .tilt-card:hover .article-cover { transform: scale(1.08); }
+
+        /* ====== 文章标签 ====== */
+        .tag {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+            color: var(--accent);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        /* ====== 技能进度条 ====== */
+        .skill-bar {
+            height: 6px;
+            background: rgba(0, 255, 136, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .skill-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #00ff88, #00cc6a);
+            width: 0;
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ====== 统计数字 ====== */
+        .stat-number {
+            font-family: 'ZCOOL QingKe HuangYou', cursive;
+            font-size: 2.5rem;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        /* ====== 头像旋转边框 ====== */
+        .avatar-ring { position: relative; display: inline-block; }
+        .avatar-ring::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: conic-gradient(var(--accent), var(--accent2), var(--accent));
+            animation: spin 6s linear infinite;
+            z-index: 0;
+        }
+        .avatar-ring img { position: relative; z-index: 1; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ====== 时间线 ====== */
+        .timeline-line-v {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+            transform: translateX(-50%);
+        }
+        .timeline-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 3px solid var(--bg);
+            box-shadow: 0 0 18px var(--glow);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+
+        /* ====== 分割线 ====== */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), var(--accent), var(--border), transparent);
+            margin: 0 auto;
+            max-width: 600px;
+        }
+
+        /* ====== 社交图标 ====== */
+        .social-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--fg-muted);
+            transition: all 0.3s ease;
+        }
+        .social-icon:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(0, 255, 136, 0.1);
+            box-shadow: 0 0 20px var(--glow);
+            transform: translateY(-3px);
+        }
+
+        /* ====== 回到顶部 ====== */
+        #back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0, 255, 136, 0.12);
+            border: 1px solid var(--border);
+            color: var(--accent);
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        #back-to-top.visible { opacity: 1; transform: translateY(0); }
+        #back-to-top:hover {
+            background: rgba(0, 255, 136, 0.25);
+            box-shadow: 0 0 20px var(--glow);
+        }
+
+        /* ====== 阅读更多按钮 ====== */
+        .read-more-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--accent);
+            border: 1px solid var(--border);
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .read-more-btn:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--glow);
+        }
+
+        /* ====== Toast 通知 ====== */
+        .toast-msg {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 14px;
+            z-index: 200;
+            background: rgba(0, 255, 136, 0.12);
+            border: 1px solid rgba(0, 255, 136, 0.25);
+            color: #00ff88;
+            backdrop-filter: blur(12px);
+            animation: toastIn 0.4s ease;
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* ====== 移动端响应式 ====== */
+        @media (max-width: 768px) {
+            .timeline-line-v  { left: 20px; }
+            .timeline-dot     { left: 20px; }
+            .stat-number      { font-size: 2rem; }
+        }
+
+        /* ====== 减弱动画偏好 ====== */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Hello World</h1>
+    <!-- 粒子画布 -->
+    <canvas id="particles-canvas" aria-hidden="true"></canvas>
+
+    <!-- 鼠标光晕 -->
+    <div id="mouse-glow" aria-hidden="true"></div>
+
+    <!-- ========== 导航栏 ========== -->
+    <nav id="navbar" class="fixed top-0 left-0 w-full z-50 transition-all duration-500" style="background:transparent;" role="navigation" aria-label="主导航">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="#home" class="font-display text-2xl" style="color:var(--accent);">小妖洞府</a>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#home"     class="nav-link font-body text-sm">首页</a>
+                <a href="#about"    class="nav-link font-body text-sm">关于</a>
+                <a href="#articles" class="nav-link font-body text-sm">文章</a>
+                <a href="#skills"   class="nav-link font-body text-sm">技能</a>
+                <a href="#timeline" class="nav-link font-body text-sm">足迹</a>
+            </div>
+            <button id="mobile-menu-btn" class="md:hidden text-xl" style="color:var(--fg);" aria-label="打开菜单">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="md:hidden hidden px-6 pb-4" style="background:rgba(7,13,10,0.95);">
+            <a href="#home"     class="block py-2 nav-link font-body text-sm">首页</a>
+            <a href="#about"    class="block py-2 nav-link font-body text-sm">关于</a>
+            <a href="#articles" class="block py-2 nav-link font-body text-sm">文章</a>
+            <a href="#skills"   class="block py-2 nav-link font-body text-sm">技能</a>
+            <a href="#timeline" class="block py-2 nav-link font-body text-sm">足迹</a>
+        </div>
+    </nav>
+
+    <!-- ========== Hero 区域 ========== -->
+    <header id="home" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div class="glow-blob" style="width:340px;height:340px;background:rgba(0,255,136,0.12);top:18%;left:8%;"></div>
+        <div class="glow-blob" style="width:260px;height:260px;background:rgba(255,107,53,0.08);top:55%;right:8%;animation-delay:-3s;"></div>
+        <div class="glow-blob" style="width:220px;height:220px;background:rgba(0,255,136,0.06);bottom:15%;left:35%;animation-delay:-6s;"></div>
+
+        <div class="relative z-10 text-center px-6">
+            <p class="font-body text-sm tracking-widest mb-4" style="color:var(--fg-muted);">欢迎来到</p>
+            <h1 class="font-display gradient-text text-5xl sm:text-7xl md:text-8xl lg:text-9xl mb-6 leading-tight">
+                小妖的洞府
+            </h1>
+            <p class="font-body text-lg md:text-xl mb-2" style="color:var(--fg);">
+                <span id="typing-text"></span><span class="typing-cursor"></span>
+            </p>
+            <p class="font-body text-sm mt-6" style="color:var(--fg-muted);">
+                在代码的丛林中修炼，于数字的深渊里成精
+            </p>
+        </div>
+
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 scroll-hint">
+            <a href="#about" aria-label="向下滚动"><i class="fas fa-chevron-down text-xl" style="color:var(--accent);opacity:0.5;"></i></a>
+        </div>
+    </header>
+
+    <!-- ========== 主内容 ========== -->
+    <main>
+        <!-- 关于 -->
+        <section id="about" class="relative py-24 px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="reveal text-center mb-16">
+                    <h2 class="font-display text-4xl md:text-5xl mb-4">妖之简介</h2>
+                    <div class="section-divider"></div>
+                </div>
+                <div class="reveal flex flex-col md:flex-row items-center gap-12 md:gap-16">
+                    <div class="avatar-ring flex-shrink-0">
+                        <img src="https://picsum.photos/seed/demon-avatar/300/300.jpg" alt="小妖头像" class="w-40 h-40 md:w-52 md:h-52 rounded-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-display text-2xl mb-4" style="color:var(--accent);">一只野生前端小妖</h3>
+                        <p class="font-body leading-relaxed mb-4" style="color:var(--fg-muted);">
+                            潜伏于代码丛林深处的小妖精，擅长用HTML符咒、CSS幻术和JavaScript妖法构建奇妙的数字世界。白天伪装成普通程序员混迹于人间，夜晚回到洞府修炼各种前端秘术。
+                        </p>
+                        <p class="font-body leading-relaxed mb-8" style="color:var(--fg-muted);">
+                            热爱创造有灵魂的交互体验，相信每一行代码都蕴含着小小的魔法。目前正在探索3D幻境和AI通灵之术，志在成为前端大妖。
+                        </p>
+                        <div class="grid grid-cols-3 gap-6">
+                            <div class="text-center"><div class="stat-number" data-target="128">0</div><div class="font-body text-xs mt-1" style="color:var(--fg-muted);">篇文章</div></div>
+                            <div class="text-center"><div class="stat-number" data-target="6">0</div><div class="font-body text-xs mt-1" style="color:var(--fg-muted);">年修炼</div></div>
+                            <div class="text-center"><div class="stat-number" data-target="42">0</div><div class="font-body text-xs mt-1" style="color:var(--fg-muted);">个项目</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 文章 -->
+        <section id="articles" class="relative py-24 px-6">
+            <div class="glow-blob" style="width:300px;height:300px;background:rgba(255,107,53,0.06);top:5%;left:-5%;animation-delay:-4s;"></div>
+            <div class="max-w-6xl mx-auto">
+                <div class="reveal text-center mb-16">
+                    <h2 class="font-display text-4xl md:text-5xl mb-4">妖法典籍</h2>
+                    <p class="font-body text-sm" style="color:var(--fg-muted);">小妖修炼途中留下的笔记与心得</p>
+                    <div class="section-divider mt-4"></div>
+                </div>
+                <div id="articles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+            </div>
+        </section>
+
+        <!-- 技能 -->
+        <section id="skills" class="relative py-24 px-6">
+            <div class="glow-blob" style="width:400px;height:400px;background:rgba(0,255,136,0.05);top:10%;right:-8%;animation-delay:-2s;"></div>
+            <div class="max-w-6xl mx-auto">
+                <div class="reveal text-center mb-16">
+                    <h2 class="font-display text-4xl md:text-5xl mb-4">妖力值</h2>
+                    <p class="font-body text-sm" style="color:var(--fg-muted);">修炼多年的功力一览</p>
+                    <div class="section-divider mt-4"></div>
+                </div>
+                <div id="skills-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            </div>
+        </section>
+
+        <!-- 时间线 -->
+        <section id="timeline" class="relative py-24 px-6">
+            <div class="max-w-4xl mx-auto">
+                <div class="reveal text-center mb-16">
+                    <h2 class="font-display text-4xl md:text-5xl mb-4">修炼足迹</h2>
+                    <p class="font-body text-sm" style="color:var(--fg-muted);">从妖生起点到如今的旅程</p>
+                    <div class="section-divider mt-4"></div>
+                </div>
+                <div id="timeline-container" class="relative">
+                    <div class="timeline-line-v hidden md:block"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ========== 页脚 ========== -->
+    <footer class="relative py-16 px-6" style="border-top:1px solid var(--border);">
+        <div class="max-w-6xl mx-auto text-center">
+            <h3 class="font-display text-2xl mb-6" style="color:var(--accent);">小妖洞府</h3>
+            <p class="font-body text-sm mb-8" style="color:var(--fg-muted);">在数字世界的角落，有一只小妖在默默修炼</p>
+            <div class="flex items-center justify-center gap-4 mb-8">
+                <a href="#" class="social-icon" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                <a href="#" class="social-icon" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-icon" aria-label="微信"><i class="fab fa-weixin"></i></a>
+                <a href="#" class="social-icon" aria-label="Bilibili"><i class="fab fa-bilibili"></i></a>
+                <a href="#" class="social-icon" aria-label="邮箱"><i class="fas fa-envelope"></i></a>
+            </div>
+            <p class="font-body text-xs" style="color:var(--fg-muted);">&copy; 2024 小妖的洞府 · 以妖之名，行码之道</p>
+        </div>
+    </footer>
+
+    <!-- 回到顶部 -->
+    <button id="back-to-top" aria-label="回到顶部"><i class="fas fa-arrow-up"></i></button>
+
+    <!-- ========== JavaScript ========== -->
+    <script>
+    (function() {
+        'use strict';
+
+        /* ====== 数据 ====== */
+        var articles = [
+            { title: '妖法入门：用Canvas召唤萤火虫', excerpt: '一只小妖的前端修炼笔记，从零开始学习Canvas粒子系统，手把手教你召唤属于自己的萤火虫群...', date: '2024-12-15', tag: 'Canvas', readTime: '8分钟', cover: 'https://picsum.photos/seed/demon-a1/600/400.jpg' },
+            { title: 'CSS幻术：让元素在月光下起舞', excerpt: '探索CSS动画的深层奥秘，从transition到keyframes，让你的页面元素如妖精般灵动飘逸...', date: '2024-11-28', tag: 'CSS', readTime: '6分钟', cover: 'https://picsum.photos/seed/demon-a2/600/400.jpg' },
+            { title: 'JavaScript妖法：异步通灵术', excerpt: '深入理解Promise与async/await的精髓，掌握与未来沟通的妖术，让异步代码优雅如咒语...', date: '2024-11-10', tag: 'JavaScript', readTime: '12分钟', cover: 'https://picsum.photos/seed/demon-a3/600/400.jpg' },
+            { title: 'Three.js幻境：构建三维妖界', excerpt: '踏入3D世界的门槛，用Three.js搭建属于你的妖界幻境，从场景到光影的完整指南...', date: '2024-10-22', tag: 'Three.js', readTime: '15分钟', cover: 'https://picsum.photos/seed/demon-a4/600/400.jpg' },
+            { title: 'Vue仙术：组件化分身术', excerpt: 'Vue组件就像妖精的分身术，一份模板可幻化万千。深入组件设计模式与最佳实践...', date: '2024-10-05', tag: 'Vue', readTime: '10分钟', cover: 'https://picsum.photos/seed/demon-a5/600/400.jpg' },
+            { title: '性能调优：妖力压缩术', excerpt: '页面加载慢如蜗牛？教你用妖力压缩术优化性能，从懒加载到代码分割的全面攻略...', date: '2024-09-18', tag: '性能优化', readTime: '9分钟', cover: 'https://picsum.photos/seed/demon-a6/600/400.jpg' }
+        ];
+
+        var skills = [
+            { name: 'JavaScript',  level: 92, icon: 'fa-brands fa-js',        accent: '#f7df1e' },
+            { name: 'CSS / 动画',  level: 88, icon: 'fa-brands fa-css3-alt',  accent: '#1572b6' },
+            { name: 'Vue.js',      level: 85, icon: 'fa-brands fa-vuejs',     accent: '#4fc08d' },
+            { name: 'TypeScript',  level: 80, icon: 'fa-solid fa-code',       accent: '#3178c6' },
+            { name: 'Node.js',     level: 78, icon: 'fa-brands fa-node-js',   accent: '#339933' },
+            { name: 'React',       level: 72, icon: 'fa-brands fa-react',     accent: '#61dafb' },
+            { name: 'Three.js',    level: 68, icon: 'fa-solid fa-cube',       accent: '#00ff88' },
+            { name: 'Python',      level: 65, icon: 'fa-brands fa-python',    accent: '#3776ab' }
+        ];
+
+        var timelineData = [
+            { year: '2024', title: '洞府建成', desc: '个人博客上线，小妖终于在数字世界有了自己的洞府，开始记录修炼心得与妖法笔记。', side: 'left' },
+            { year: '2023', title: '修炼进阶', desc: '深入前端框架与3D可视化领域，掌握了Vue、React和Three.js等高级妖术。', side: 'right' },
+            { year: '2022', title: '初入江湖', desc: '以实习生的身份踏入职场，在团队项目中磨练技艺，初尝协作之道。', side: 'left' },
+            { year: '2021', title: '入门修炼', desc: '在深山老林中发现编程的奥秘，从HTML和CSS开始踏上修仙之路。', side: 'right' },
+            { year: '2020', title: '妖生启蒙', desc: '偶然间接触到一篇关于前端开发的文章，从此对数字世界产生无限好奇与向往。', side: 'left' }
+        ];
+
+        var typingTexts = [
+            '潜入代码深渊的小妖精',
+            '用CSS编织幻术的修行者',
+            '在像素丛林中修炼的妖怪',
+            '以键盘为法器的前端术士'
+        ];
+
+        /* ====== 粒子系统 ====== */
+        var canvas = document.getElementById('particles-canvas');
+        var ctx = canvas.getContext('2d');
+        var particles = [];
+        var mouseX = -9999, mouseY = -9999;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function Particle() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2.5 + 0.5;
+            this.vx = (Math.random() - 0.5) * 0.35;
+            this.vy = (Math.random() - 0.5) * 0.35;
+            this.phase = Math.random() * Math.PI * 2;
+            this.phaseSpeed = Math.random() * 0.02 + 0.006;
+            var rand = Math.random();
+            if (rand < 0.68) { this.r = 0;   this.g = 255; this.b = 136; }
+            else if (rand < 0.88) { this.r = 255; this.g = 107; this.b = 53; }
+            else { this.r = 180; this.g = 255; this.b = 200; }
+        }
+
+        Particle.prototype.update = function() {
+            this.phase += this.phaseSpeed;
+            var alpha = (Math.sin(this.phase) + 1) / 2 * 0.7 + 0.1;
+
+            // 鼠标吸引
+            var dx = mouseX - this.x;
+            var dy = mouseY - this.y;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 220 && dist > 1) {
+                var force = (220 - dist) / 220 * 0.015;
+                this.vx += (dx / dist) * force;
+                this.vy += (dy / dist) * force;
+            }
+
+            this.vx *= 0.992;
+            this.vy *= 0.992;
+            this.x += this.vx;
+            this.y += this.vy;
+
+            if (this.x < -20) this.x = canvas.width + 20;
+            if (this.x > canvas.width + 20) this.x = -20;
+            if (this.y < -20) this.y = canvas.height + 20;
+            if (this.y > canvas.height + 20) this.y = -20;
+
+            return alpha;
+        };
+
+        Particle.prototype.draw = function(alpha) {
+            var r = this.r, g = this.g, b = this.b, x = this.x, y = this.y, sz = this.size;
+            var glowR = Math.max(0.1, sz * 6);
+            var grad = ctx.createRadialGradient(x, y, 0, x, y, glowR);
+            grad.addColorStop(0, 'rgba(' + r + ',' + g + ',' + b + ',' + (alpha * 0.45).toFixed(3) + ')');
+            grad.addColorStop(1, 'rgba(' + r + ',' + g + ',' + b + ',0)');
+            ctx.beginPath();
+            ctx.arc(x, y, glowR, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(x, y, Math.max(0.1, sz), 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + alpha.toFixed(3) + ')';
+            ctx.fill();
+        };
+
+        function initParticles() {
+            particles = [];
+            var count = Math.min(110, Math.floor(canvas.width * canvas.height / 14000));
+            for (var i = 0; i < count; i++) particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (var i = 0; i < particles.length; i++) {
+                var a = particles[i].update();
+                particles[i].draw(a);
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        resizeCanvas();
+        initParticles();
+        animateParticles();
+
+        window.addEventListener('resize', function() {
+            resizeCanvas();
+            initParticles();
+        });
+
+        /* ====== 鼠标跟踪 ====== */
+        var glowEl = document.getElementById('mouse-glow');
+        document.addEventListener('mousemove', function(e) {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            glowEl.style.left = e.clientX + 'px';
+            glowEl.style.top  = e.clientY + 'px';
+        });
+
+        /* ====== 打字机效果 ====== */
+        var typingEl = document.getElementById('typing-text');
+        var tIdx = 0, cIdx = 0, isDeleting = false;
+
+        function typeStep() {
+            var current = typingTexts[tIdx];
+            if (!isDeleting) {
+                typingEl.textContent = current.substring(0, cIdx + 1);
+                cIdx++;
+                if (cIdx >= current.length) {
+                    isDeleting = true;
+                    setTimeout(typeStep, 2200);
+                    return;
+                }
+                setTimeout(typeStep, 80 + Math.random() * 60);
+            } else {
+                typingEl.textContent = current.substring(0, cIdx - 1);
+                cIdx--;
+                if (cIdx <= 0) {
+                    isDeleting = false;
+                    tIdx = (tIdx + 1) % typingTexts.length;
+                    setTimeout(typeStep, 500);
+                    return;
+                }
+                setTimeout(typeStep, 35);
+            }
+        }
+        typeStep();
+
+        /* ====== 导航栏滚动效果 ====== */
+        var navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 60) navbar.classList.add('nav-scrolled');
+            else navbar.classList.remove('nav-scrolled');
+        });
+
+        /* ====== 移动端菜单 ====== */
+        var mobileBtn  = document.getElementById('mobile-menu-btn');
+        var mobileMenu = document.getElementById('mobile-menu');
+        mobileBtn.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+        });
+        mobileMenu.querySelectorAll('a').forEach(function(a) {
+            a.addEventListener('click', function() { mobileMenu.classList.add('hidden'); });
+        });
+
+        /* ====== 生成文章卡片 ====== */
+        var articlesGrid = document.getElementById('articles-grid');
+        articles.forEach(function(art, i) {
+            var card = document.createElement('article');
+            card.className = 'tilt-card reveal rounded-xl overflow-hidden';
+            card.style.cssText = 'background:var(--card);border:1px solid var(--border);transition:transform 0.1s ease,box-shadow 0.3s ease;';
+            card.setAttribute('data-delay', (i * 100).toString());
+            card.innerHTML =
+                '<div class="overflow-hidden h-44">' +
+                    '<img src="' + art.cover + '" alt="' + art.title + '" class="article-cover w-full h-full object-cover">' +
+                '</div>' +
+                '<div class="p-5">' +
+                    '<div class="flex items-center justify-between mb-3">' +
+                        '<span class="tag">' + art.tag + '</span>' +
+                        '<span class="font-body text-xs" style="color:var(--fg-muted);">' + art.date + '</span>' +
+                    '</div>' +
+                    '<h3 class="font-display text-lg mb-2" style="color:var(--fg);">' + art.title + '</h3>' +
+                    '<p class="font-body text-sm leading-relaxed mb-4" style="color:var(--fg-muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + art.excerpt + '</p>' +
+                    '<div class="flex items-center justify-between">' +
+                        '<span class="font-body text-xs" style="color:var(--fg-muted);"><i class="far fa-clock mr-1"></i>' + art.readTime + '</span>' +
+                        '<button class="read-more-btn" data-title="' + art.title + '">阅读更多 <i class="fas fa-arrow-right text-xs"></i></button>' +
+                    '</div>' +
+                '</div>';
+            articlesGrid.appendChild(card);
+        });
+
+        /* 文章卡片3D倾斜 + 阅读更多 */
+        document.querySelectorAll('.tilt-card').forEach(function(card) {
+            card.addEventListener('mousemove', function(e) {
+                var rect = card.getBoundingClientRect();
+                var x = e.clientX - rect.left;
+                var y = e.clientY - rect.top;
+                var cx = rect.width / 2;
+                var cy = rect.height / 2;
+                var rx = (y - cy) / cy * -6;
+                var ry = (x - cx) / cx * 6;
+                card.style.transform = 'perspective(800px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) scale(1.02)';
+            });
+            card.addEventListener('mouseleave', function() {
+                card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) scale(1)';
+            });
+        });
+
+        /* 阅读更多按钮 → Toast */
+        document.querySelectorAll('.read-more-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                showToast('正在打开《' + btn.getAttribute('data-title') + '》...');
+            });
+        });
+
+        /* ====== 生成技能卡片 ====== */
+        var skillsGrid = document.getElementById('skills-grid');
+        skills.forEach(function(sk, i) {
+            var el = document.createElement('div');
+            el.className = 'reveal skill-item rounded-xl p-5 flex items-center gap-4';
+            el.style.cssText = 'background:var(--card);border:1px solid var(--border);';
+            el.setAttribute('data-delay', (i * 80).toString());
+            el.innerHTML =
+                '<div class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center text-xl" style="background:rgba(0,255,136,0.08);color:' + sk.accent + ';">' +
+                    '<i class="' + sk.icon + '"></i>' +
+                '</div>' +
+                '<div class="flex-1 min-w-0">' +
+                    '<div class="flex items-center justify-between mb-2">' +
+                        '<span class="font-body text-sm font-bold" style="color:var(--fg);">' + sk.name + '</span>' +
+                        '<span class="font-body text-xs" style="color:var(--accent);">' + sk.level + '%</span>' +
+                    '</div>' +
+                    '<div class="skill-bar">' +
+                        '<div class="skill-bar-fill" data-width="' + sk.level + '"></div>' +
+                    '</div>' +
+                '</div>';
+            skillsGrid.appendChild(el);
+        });
+
+        /* ====== 生成时间线 ====== */
+        var tlContainer = document.getElementById('timeline-container');
+        timelineData.forEach(function(item, i) {
+            var isLeft = item.side === 'left';
+            var el = document.createElement('div');
+            el.className = 'reveal relative mb-12 md:mb-16';
+            el.setAttribute('data-delay', (i * 120).toString());
+
+            // 移动端：全部靠右显示
+            var mobileHTML =
+                '<div class="md:hidden pl-12">' +
+                    '<div class="timeline-dot" style="left:20px;top:4px;"></div>' +
+                    '<span class="font-display text-sm" style="color:var(--accent);">' + item.year + '</span>' +
+                    '<h3 class="font-display text-xl mt-1 mb-2" style="color:var(--fg);">' + item.title + '</h3>' +
+                    '<p class="font-body text-sm leading-relaxed" style="color:var(--fg-muted);">' + item.desc + '</p>' +
+                '</div>';
+
+            // 桌面端：左右交替
+            var desktopHTML =
+                '<div class="hidden md:flex items-center">' +
+                    (isLeft
+                        ? '<div class="w-5/12 pr-8 text-right">' +
+                              '<span class="font-display text-sm" style="color:var(--accent);">' + item.year + '</span>' +
+                              '<h3 class="font-display text-xl mt-1 mb-2" style="color:var(--fg);">' + item.title + '</h3>' +
+                              '<p class="font-body text-sm leading-relaxed" style="color:var(--fg-muted);">' + item.desc + '</p>' +
+                          '</div>' +
+                          '<div class="w-2/12 flex justify-center"><div class="timeline-dot" style="position:relative;left:auto;transform:none;"></div></div>' +
+                          '<div class="w-5/12 pl-8"></div>'
+                        : '<div class="w-5/12 pr-8"></div>' +
+                          '<div class="w-2/12 flex justify-center"><div class="timeline-dot" style="position:relative;left:auto;transform:none;"></div></div>' +
+                          '<div class="w-5/12 pl-8 text-left">' +
+                              '<span class="font-display text-sm" style="color:var(--accent);">' + item.year + '</span>' +
+                              '<h3 class="font-display text-xl mt-1 mb-2" style="color:var(--fg);">' + item.title + '</h3>' +
+                              '<p class="font-body text-sm leading-relaxed" style="color:var(--fg-muted);">' + item.desc + '</p>' +
+                          '</div>'
+                    ) +
+                '</div>';
+
+            el.innerHTML = mobileHTML + desktopHTML;
+            tlContainer.appendChild(el);
+        });
+
+        /* ====== IntersectionObserver 滚动揭示 ====== */
+        var revealObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    var delay = parseInt(entry.target.getAttribute('data-delay') || '0', 10);
+                    setTimeout(function() {
+                        entry.target.classList.add('visible');
+                    }, delay);
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        document.querySelectorAll('.reveal').forEach(function(el) {
+            revealObserver.observe(el);
+        });
+
+        /* ====== 技能进度条动画 ====== */
+        var skillObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    var fills = entry.target.querySelectorAll('.skill-bar-fill');
+                    fills.forEach(function(fill, i) {
+                        setTimeout(function() {
+                            fill.style.width = fill.getAttribute('data-width') + '%';
+                        }, i * 120);
+                    });
+                    skillObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.2 });
+
+        skillObserver.observe(skillsGrid);
+
+        /* ====== 统计数字递增动画 ====== */
+        var statAnimated = false;
+        var statObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting && !statAnimated) {
+                    statAnimated = true;
+                    document.querySelectorAll('.stat-number').forEach(function(el) {
+                        var target = parseInt(el.getAttribute('data-target'), 10);
+                        var current = 0;
+                        var step = Math.max(1, Math.floor(target / 50));
+                        var timer = setInterval(function() {
+                            current += step;
+                            if (current >= target) { current = target; clearInterval(timer); }
+                            el.textContent = current;
+                        }, 30);
+                    });
+                }
+            });
+        }, { threshold: 0.3 });
+
+        document.querySelectorAll('.stat-number').forEach(function(el) {
+            statObserver.observe(el.closest('.grid'));
+        });
+
+        /* ====== 回到顶部 ====== */
+        var backBtn = document.getElementById('back-to-top');
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 500) backBtn.classList.add('visible');
+            else backBtn.classList.remove('visible');
+        });
+        backBtn.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        /* ====== Toast 通知 ====== */
+        function showToast(msg) {
+            var old = document.querySelector('.toast-msg');
+            if (old) old.remove();
+            var t = document.createElement('div');
+            t.className = 'toast-msg';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(function() {
+                t.style.opacity = '0';
+                t.style.transition = 'opacity 0.5s ease';
+                setTimeout(function() { t.remove(); }, 500);
+            }, 2500);
+        }
+
+        /* ====== 页脚社交图标点击反馈 ====== */
+        document.querySelectorAll('.social-icon').forEach(function(icon) {
+            icon.addEventListener('click', function(e) {
+                e.preventDefault();
+                var label = icon.getAttribute('aria-label') || '社交平台';
+                showToast('即将前往' + label + '...');
+            });
+        });
+
+    })();
+    </script>
 </body>
 </html>
