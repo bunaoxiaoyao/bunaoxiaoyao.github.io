@@ -24,7 +24,6 @@
     </script>
 
     <style>
-        /* ====== CSS 变量 ====== */
         :root {
             --bg: #070d0a;
             --bg-light: #0d1a14;
@@ -37,7 +36,6 @@
             --glow: rgba(0, 255, 136, 0.25);
         }
 
-        /* ====== 全局重置 ====== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
         body {
@@ -47,12 +45,10 @@
             overflow-x: hidden;
         }
 
-        /* ====== 自定义滚动条 ====== */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
-        /* ====== 粒子画布 ====== */
         #particles-canvas {
             position: fixed;
             inset: 0;
@@ -62,7 +58,6 @@
             pointer-events: none;
         }
 
-        /* ====== 鼠标光晕 ====== */
         #mouse-glow {
             position: fixed;
             width: 420px;
@@ -76,7 +71,6 @@
             will-change: left, top;
         }
 
-        /* ====== 渐变文字动画 ====== */
         .gradient-text {
             background: linear-gradient(135deg, #00ff88, #ff6b35, #00ff88);
             background-size: 200% 200%;
@@ -91,7 +85,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* ====== 导航滚动样式 ====== */
         .nav-scrolled {
             background: rgba(7, 13, 10, 0.88) !important;
             backdrop-filter: blur(20px) !important;
@@ -99,7 +92,6 @@
             border-bottom: 1px solid var(--border) !important;
         }
 
-        /* ====== 导航链接悬浮 ====== */
         .nav-link {
             position: relative;
             color: var(--fg-muted);
@@ -118,7 +110,6 @@
         .nav-link:hover { color: var(--accent); }
         .nav-link:hover::after { width: 100%; }
 
-        /* ====== 光斑装饰 ====== */
         .glow-blob {
             position: absolute;
             border-radius: 50%;
@@ -133,7 +124,6 @@
             66%  { transform: translate(-25px, 20px) scale(0.9); }
         }
 
-        /* ====== 打字机光标 ====== */
         .typing-cursor {
             display: inline-block;
             width: 2px;
@@ -148,14 +138,12 @@
             50%      { opacity: 0; }
         }
 
-        /* ====== 滚动提示箭头 ====== */
         .scroll-hint { animation: bounceDown 2s ease-in-out infinite; }
         @keyframes bounceDown {
             0%, 100% { transform: translateY(0); }
             50%      { transform: translateY(10px); }
         }
 
-        /* ====== 入场揭示动画 ====== */
         .reveal {
             opacity: 0;
             transform: translateY(40px);
@@ -166,7 +154,6 @@
             transform: translateY(0);
         }
 
-        /* ====== 3D 倾斜卡片 ====== */
         .tilt-card {
             transition: box-shadow 0.3s ease;
             transform-style: preserve-3d;
@@ -178,7 +165,6 @@
         .article-cover { transition: transform 0.5s ease; }
         .tilt-card:hover .article-cover { transform: scale(1.08); }
 
-        /* ====== 文章标签 ====== */
         .tag {
             display: inline-block;
             padding: 2px 12px;
@@ -188,8 +174,12 @@
             color: var(--accent);
             background: rgba(0, 255, 136, 0.05);
         }
+        .tag-dotnet {
+            color: #512bd4;
+            border-color: rgba(81, 43, 212, 0.3);
+            background: rgba(81, 43, 212, 0.08);
+        }
 
-        /* ====== 技能进度条 ====== */
         .skill-bar {
             height: 6px;
             background: rgba(0, 255, 136, 0.08);
@@ -204,7 +194,6 @@
             transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* ====== 统计数字 ====== */
         .stat-number {
             font-family: 'ZCOOL QingKe HuangYou', cursive;
             font-size: 2.5rem;
@@ -212,21 +201,19 @@
             line-height: 1;
         }
 
-        /* ====== 头像旋转边框 ====== */
         .avatar-ring { position: relative; display: inline-block; }
         .avatar-ring::before {
             content: '';
             position: absolute;
             inset: -4px;
             border-radius: 50%;
-            background: conic-gradient(var(--accent), var(--accent2), var(--accent));
+            background: conic-gradient(var(--accent), var(--accent2), #512bd4, var(--accent));
             animation: spin 6s linear infinite;
             z-index: 0;
         }
         .avatar-ring img { position: relative; z-index: 1; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ====== 时间线 ====== */
         .timeline-line-v {
             position: absolute;
             left: 50%;
@@ -249,7 +236,6 @@
             z-index: 2;
         }
 
-        /* ====== 分割线 ====== */
         .section-divider {
             height: 1px;
             background: linear-gradient(90deg, transparent, var(--border), var(--accent), var(--border), transparent);
@@ -257,7 +243,6 @@
             max-width: 600px;
         }
 
-        /* ====== 社交图标 ====== */
         .social-icon {
             width: 42px;
             height: 42px;
@@ -277,7 +262,6 @@
             transform: translateY(-3px);
         }
 
-        /* ====== 回到顶部 ====== */
         #back-to-top {
             position: fixed;
             bottom: 30px;
@@ -304,7 +288,6 @@
             box-shadow: 0 0 20px var(--glow);
         }
 
-        /* ====== 阅读更多按钮 ====== */
         .read-more-btn {
             display: inline-flex;
             align-items: center;
@@ -324,7 +307,6 @@
             box-shadow: 0 0 15px var(--glow);
         }
 
-        /* ====== Toast 通知 ====== */
         .toast-msg {
             position: fixed;
             bottom: 90px;
@@ -346,14 +328,39 @@
             to   { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
 
-        /* ====== 移动端响应式 ====== */
+        .tech-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            background: rgba(0, 255, 136, 0.06);
+            border: 1px solid var(--border);
+            color: var(--fg-muted);
+            transition: all 0.3s ease;
+        }
+        .tech-badge:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(0, 255, 136, 0.1);
+        }
+        .tech-badge-dotnet {
+            background: rgba(81, 43, 212, 0.08);
+            border-color: rgba(81, 43, 212, 0.2);
+        }
+        .tech-badge-dotnet:hover {
+            color: #512bd4;
+            border-color: #512bd4;
+            background: rgba(81, 43, 212, 0.15);
+        }
+
         @media (max-width: 768px) {
             .timeline-line-v  { left: 20px; }
             .timeline-dot     { left: 20px; }
             .stat-number      { font-size: 2rem; }
         }
 
-        /* ====== 减弱动画偏好 ====== */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -364,13 +371,10 @@
 </head>
 
 <body>
-    <!-- 粒子画布 -->
     <canvas id="particles-canvas" aria-hidden="true"></canvas>
-
-    <!-- 鼠标光晕 -->
     <div id="mouse-glow" aria-hidden="true"></div>
 
-    <!-- ========== 导航栏 ========== -->
+    <!-- 导航栏 -->
     <nav id="navbar" class="fixed top-0 left-0 w-full z-50 transition-all duration-500" style="background:transparent;" role="navigation" aria-label="主导航">
         <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
             <a href="#home" class="font-display text-2xl" style="color:var(--accent);">小妖洞府</a>
@@ -385,7 +389,6 @@
                 <i class="fas fa-bars"></i>
             </button>
         </div>
-        <!-- 移动端菜单 -->
         <div id="mobile-menu" class="md:hidden hidden px-6 pb-4" style="background:rgba(7,13,10,0.95);">
             <a href="#home"     class="block py-2 nav-link font-body text-sm">首页</a>
             <a href="#about"    class="block py-2 nav-link font-body text-sm">关于</a>
@@ -395,11 +398,11 @@
         </div>
     </nav>
 
-    <!-- ========== Hero 区域 ========== -->
+    <!-- Hero -->
     <header id="home" class="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div class="glow-blob" style="width:340px;height:340px;background:rgba(0,255,136,0.12);top:18%;left:8%;"></div>
-        <div class="glow-blob" style="width:260px;height:260px;background:rgba(255,107,53,0.08);top:55%;right:8%;animation-delay:-3s;"></div>
-        <div class="glow-blob" style="width:220px;height:220px;background:rgba(0,255,136,0.06);bottom:15%;left:35%;animation-delay:-6s;"></div>
+        <div class="glow-blob" style="width:260px;height:260px;background:rgba(81,43,212,0.1);top:55%;right:8%;animation-delay:-3s;"></div>
+        <div class="glow-blob" style="width:220px;height:220px;background:rgba(255,107,53,0.07);bottom:15%;left:35%;animation-delay:-6s;"></div>
 
         <div class="relative z-10 text-center px-6">
             <p class="font-body text-sm tracking-widest mb-4" style="color:var(--fg-muted);">欢迎来到</p>
@@ -410,8 +413,15 @@
                 <span id="typing-text"></span><span class="typing-cursor"></span>
             </p>
             <p class="font-body text-sm mt-6" style="color:var(--fg-muted);">
-                在代码的丛林中修炼，于数字的深渊里成精
+                在服务器的深渊里修炼，于 .NET 的灵脉上成精
             </p>
+            <div class="flex items-center justify-center gap-3 mt-8 flex-wrap">
+                <span class="tech-badge tech-badge-dotnet"><i class="fa-solid fa-code"></i>.NET</span>
+                <span class="tech-badge"><i class="fa-solid fa-server"></i>C#</span>
+                <span class="tech-badge"><i class="fa-solid fa-database"></i>SQL</span>
+                <span class="tech-badge"><i class="fa-solid fa-cloud"></i>DevOps</span>
+                <span class="tech-badge"><i class="fa-brands fa-docker"></i>Docker</span>
+            </div>
         </div>
 
         <div class="absolute bottom-8 left-1/2 -translate-x-1/2 scroll-hint">
@@ -419,31 +429,31 @@
         </div>
     </header>
 
-    <!-- ========== 主内容 ========== -->
+    <!-- 主内容 -->
     <main>
         <!-- 关于 -->
         <section id="about" class="relative py-24 px-6">
             <div class="max-w-6xl mx-auto">
                 <div class="reveal text-center mb-16">
-                    <h2 class="font-display text-4xl md:text-5xl mb-4">妖之简介</h2>
+                    <h2 class="font-display text-4xl md:text-5xl mb-4">关于小妖</h2>
                     <div class="section-divider"></div>
                 </div>
                 <div class="reveal flex flex-col md:flex-row items-center gap-12 md:gap-16">
                     <div class="avatar-ring flex-shrink-0">
-                        <img src="https://picsum.photos/seed/demon-avatar/300/300.jpg" alt="小妖头像" class="w-40 h-40 md:w-52 md:h-52 rounded-full object-cover">
+                        <img src="https://picsum.photos/seed/xiaoyao-avatar/300/300.jpg" alt="小妖头像" class="w-40 h-40 md:w-52 md:h-52 rounded-full object-cover">
                     </div>
                     <div class="flex-1">
-                        <h3 class="font-display text-2xl mb-4" style="color:var(--accent);">一只野生前端小妖</h3>
+                        <h3 class="font-display text-2xl mb-4" style="color:var(--accent);">一只深耕后端的小妖</h3>
                         <p class="font-body leading-relaxed mb-4" style="color:var(--fg-muted);">
-                            潜伏于代码丛林深处的小妖精，擅长用HTML符咒、CSS幻术和JavaScript妖法构建奇妙的数字世界。白天伪装成普通程序员混迹于人间，夜晚回到洞府修炼各种前端秘术。
+                            我是小妖，一个专注于后端开发的程序员。日常用 C# 编写咒语，在 .NET 的灵脉上构建坚实的服务架构。擅长领域驱动设计、微服务拆分和高并发系统的调优与治理。
                         </p>
                         <p class="font-body leading-relaxed mb-8" style="color:var(--fg-muted);">
-                            热爱创造有灵魂的交互体验，相信每一行代码都蕴含着小小的魔法。目前正在探索3D幻境和AI通灵之术，志在成为前端大妖。
+                            坚信好的后端架构就像一座深不可测的妖洞——表面平静，内部却暗藏玄机、运转精密。从 ASP.NET Core 到 EF Core，从 Docker 到 Kubernetes，正在不断拓展自己的修炼版图。
                         </p>
                         <div class="grid grid-cols-3 gap-6">
-                            <div class="text-center"><div class="stat-number" data-target="128">0</div><div class="font-body text-xs mt-1" style="color:var(--fg-muted);">篇文章</div></div>
-                            <div class="text-center"><div class="stat-number" data-target="6">0</div><div class="font-body text-xs mt-1" style="color:var(--fg-muted);">年修炼</div></div>
-                            <div class="text-center"><div class="stat-number" data-target="42">0</div><div class="font-body text-xs mt-1" style="color:var(--fg-muted);">个项目</div></div>
+                            <div class="text-center"><div class="stat-number" data-target="156">0</div><div class="font-body text-xs mt-1" style="color:var(--fg-muted);">篇文章</div></div>
+                            <div class="text-center"><div class="stat-number" data-target="8">0</div><div class="font-body text-xs mt-1" style="color:var(--fg-muted);">年修炼</div></div>
+                            <div class="text-center"><div class="stat-number" data-target="67">0</div><div class="font-body text-xs mt-1" style="color:var(--fg-muted);">个项目</div></div>
                         </div>
                     </div>
                 </div>
@@ -452,11 +462,12 @@
 
         <!-- 文章 -->
         <section id="articles" class="relative py-24 px-6">
-            <div class="glow-blob" style="width:300px;height:300px;background:rgba(255,107,53,0.06);top:5%;left:-5%;animation-delay:-4s;"></div>
+            <div class="glow-blob" style="width:300px;height:300px;background:rgba(81,43,212,0.06);top:5%;left:-5%;animation-delay:-4s;"></div>
+            <div class="glow-blob" style="width:250px;height:250px;background:rgba(255,107,53,0.05);bottom:10%;right:-3%;animation-delay:-7s;"></div>
             <div class="max-w-6xl mx-auto">
                 <div class="reveal text-center mb-16">
                     <h2 class="font-display text-4xl md:text-5xl mb-4">妖法典籍</h2>
-                    <p class="font-body text-sm" style="color:var(--fg-muted);">小妖修炼途中留下的笔记与心得</p>
+                    <p class="font-body text-sm" style="color:var(--fg-muted);">小妖在后端修炼途中留下的笔记与心得</p>
                     <div class="section-divider mt-4"></div>
                 </div>
                 <div id="articles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
@@ -491,64 +502,65 @@
         </section>
     </main>
 
-    <!-- ========== 页脚 ========== -->
+    <!-- 页脚 -->
     <footer class="relative py-16 px-6" style="border-top:1px solid var(--border);">
         <div class="max-w-6xl mx-auto text-center">
             <h3 class="font-display text-2xl mb-6" style="color:var(--accent);">小妖洞府</h3>
-            <p class="font-body text-sm mb-8" style="color:var(--fg-muted);">在数字世界的角落，有一只小妖在默默修炼</p>
+            <p class="font-body text-sm mb-8" style="color:var(--fg-muted);">在数字世界的角落，有一只小妖在默默修炼后端之道</p>
             <div class="flex items-center justify-center gap-4 mb-8">
                 <a href="#" class="social-icon" aria-label="GitHub"><i class="fab fa-github"></i></a>
-                <a href="#" class="social-icon" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-icon" aria-label="博客园"><i class="fas fa-book"></i></a>
                 <a href="#" class="social-icon" aria-label="微信"><i class="fab fa-weixin"></i></a>
-                <a href="#" class="social-icon" aria-label="Bilibili"><i class="fab fa-bilibili"></i></a>
+                <a href="#" class="social-icon" aria-label="掘金"><i class="fas fa-fire"></i></a>
                 <a href="#" class="social-icon" aria-label="邮箱"><i class="fas fa-envelope"></i></a>
             </div>
-            <p class="font-body text-xs" style="color:var(--fg-muted);">&copy; 2024 小妖的洞府 · 以妖之名，行码之道</p>
+            <p class="font-body text-xs" style="color:var(--fg-muted);">&copy; 2026 小妖的洞府 · 以妖之名，行码之道</p>
         </div>
     </footer>
 
-    <!-- 回到顶部 -->
     <button id="back-to-top" aria-label="回到顶部"><i class="fas fa-arrow-up"></i></button>
 
-    <!-- ========== JavaScript ========== -->
     <script>
     (function() {
         'use strict';
 
         /* ====== 数据 ====== */
         var articles = [
-            { title: '妖法入门：用Canvas召唤萤火虫', excerpt: '一只小妖的前端修炼笔记，从零开始学习Canvas粒子系统，手把手教你召唤属于自己的萤火虫群...', date: '2024-12-15', tag: 'Canvas', readTime: '8分钟', cover: 'https://picsum.photos/seed/demon-a1/600/400.jpg' },
-            { title: 'CSS幻术：让元素在月光下起舞', excerpt: '探索CSS动画的深层奥秘，从transition到keyframes，让你的页面元素如妖精般灵动飘逸...', date: '2024-11-28', tag: 'CSS', readTime: '6分钟', cover: 'https://picsum.photos/seed/demon-a2/600/400.jpg' },
-            { title: 'JavaScript妖法：异步通灵术', excerpt: '深入理解Promise与async/await的精髓，掌握与未来沟通的妖术，让异步代码优雅如咒语...', date: '2024-11-10', tag: 'JavaScript', readTime: '12分钟', cover: 'https://picsum.photos/seed/demon-a3/600/400.jpg' },
-            { title: 'Three.js幻境：构建三维妖界', excerpt: '踏入3D世界的门槛，用Three.js搭建属于你的妖界幻境，从场景到光影的完整指南...', date: '2024-10-22', tag: 'Three.js', readTime: '15分钟', cover: 'https://picsum.photos/seed/demon-a4/600/400.jpg' },
-            { title: 'Vue仙术：组件化分身术', excerpt: 'Vue组件就像妖精的分身术，一份模板可幻化万千。深入组件设计模式与最佳实践...', date: '2024-10-05', tag: 'Vue', readTime: '10分钟', cover: 'https://picsum.photos/seed/demon-a5/600/400.jpg' },
-            { title: '性能调优：妖力压缩术', excerpt: '页面加载慢如蜗牛？教你用妖力压缩术优化性能，从懒加载到代码分割的全面攻略...', date: '2024-09-18', tag: '性能优化', readTime: '9分钟', cover: 'https://picsum.photos/seed/demon-a6/600/400.jpg' }
+            { title: '.NET 9 深度解析：性能妖术再进化', excerpt: '.NET 9 带来了哪些底层性能优化？从 JIT 编译器改进到 GC 调整，从 Span<T> 增强到新的管道模型，深入剖析每个变更背后的设计哲学...', date: '2026-03-15', tag: '.NET', readTime: '14分钟', cover: 'https://picsum.photos/seed/xy-dotnet9/600/400.jpg' },
+            { title: 'C# 13 新特性：模式匹配的终极形态', excerpt: 'C# 13 进一步扩展了模式匹配的能力，新的列表模式、递归模式与组合器让条件逻辑如同妖术般精炼。本文逐一拆解每个新语法糖...', date: '2026-02-28', tag: 'C#', readTime: '10分钟', cover: 'https://picsum.photos/seed/xy-csharp13/600/400.jpg' },
+            { title: '领域驱动设计：从妖洞到微服务的架构之道', excerpt: '如何用 DDD 的思想拆分单体应用？从限界上下文的识别到聚合根的设计，从领域事件到最终一致性，一份实战导向的微服务架构指南...', date: '2026-02-10', tag: '架构', readTime: '18分钟', cover: 'https://picsum.photos/seed/xy-ddd/600/400.jpg' },
+            { title: 'Entity Framework Core 9 高性能调优秘术', excerpt: 'EF Core 用起来爽，慢起来也要命。拆解 N+1 查询、编译查询缓存、批量操作优化、分表分库策略，让 ORM 如妖术般流畅...', date: '2026-01-22', tag: 'EF Core', readTime: '12分钟', cover: 'https://picsum.photos/seed/xy-efcore/600/400.jpg' },
+            { title: 'Docker + K8s：小妖的容器化修炼手册', excerpt: '从 Dockerfile 编写到 K8s 编排部署，从 Helm Chart 到服务网格 Istio，一份后端工程师视角的容器化实战记录...', date: '2026-01-05', tag: 'DevOps', readTime: '16分钟', cover: 'https://picsum.photos/seed/xy-k8s/600/400.jpg' },
+            { title: 'Redis 高并发实战：妖群涌入时的缓存之道', excerpt: '当每秒十万级请求涌来，你的 Redis 还撑得住吗？缓存穿透、雪崩、击穿的防御阵法，分布式锁的精妙实现，集群方案的选择之道...', date: '2025-12-18', tag: 'Redis', readTime: '13分钟', cover: 'https://picsum.photos/seed/xy-redis/600/400.jpg' }
         ];
 
         var skills = [
-            { name: 'JavaScript',  level: 92, icon: 'fa-brands fa-js',        accent: '#f7df1e' },
-            { name: 'CSS / 动画',  level: 88, icon: 'fa-brands fa-css3-alt',  accent: '#1572b6' },
-            { name: 'Vue.js',      level: 85, icon: 'fa-brands fa-vuejs',     accent: '#4fc08d' },
-            { name: 'TypeScript',  level: 80, icon: 'fa-solid fa-code',       accent: '#3178c6' },
-            { name: 'Node.js',     level: 78, icon: 'fa-brands fa-node-js',   accent: '#339933' },
-            { name: 'React',       level: 72, icon: 'fa-brands fa-react',     accent: '#61dafb' },
-            { name: 'Three.js',    level: 68, icon: 'fa-solid fa-cube',       accent: '#00ff88' },
-            { name: 'Python',      level: 65, icon: 'fa-brands fa-python',    accent: '#3776ab' }
+            { name: 'C#',               level: 95, icon: 'fa-solid fa-code',       accent: '#68217a' },
+            { name: '.NET / ASP.NET Core', level: 93, icon: 'fa-solid fa-server',     accent: '#512bd4' },
+            { name: 'Entity Framework Core', level: 88, icon: 'fa-solid fa-database', accent: '#5c2d91' },
+            { name: 'SQL Server / MySQL',  level: 85, icon: 'fa-solid fa-table',      accent: '#cc2927' },
+            { name: 'Redis',              level: 82, icon: 'fa-solid fa-bolt',        accent: '#dc382d' },
+            { name: 'Docker / K8s',       level: 78, icon: 'fa-brands fa-docker',     accent: '#2496ed' },
+            { name: 'Linux / Shell',      level: 76, icon: 'fa-brands fa-linux',      accent: '#fcc624' },
+            { name: 'CI/CD / DevOps',     level: 74, icon: 'fa-solid fa-rotate',      accent: '#ff6b35' },
+            { name: 'RabbitMQ / Kafka',   level: 72, icon: 'fa-solid fa-diagram-project', accent: '#ff6600' },
+            { name: 'TypeScript / Vue',   level: 65, icon: 'fa-brands fa-vuejs',      accent: '#4fc08d' }
         ];
 
         var timelineData = [
-            { year: '2024', title: '洞府建成', desc: '个人博客上线，小妖终于在数字世界有了自己的洞府，开始记录修炼心得与妖法笔记。', side: 'left' },
-            { year: '2023', title: '修炼进阶', desc: '深入前端框架与3D可视化领域，掌握了Vue、React和Three.js等高级妖术。', side: 'right' },
-            { year: '2022', title: '初入江湖', desc: '以实习生的身份踏入职场，在团队项目中磨练技艺，初尝协作之道。', side: 'left' },
-            { year: '2021', title: '入门修炼', desc: '在深山老林中发现编程的奥秘，从HTML和CSS开始踏上修仙之路。', side: 'right' },
-            { year: '2020', title: '妖生启蒙', desc: '偶然间接触到一篇关于前端开发的文章，从此对数字世界产生无限好奇与向往。', side: 'left' }
+            { year: '2026', title: '洞府新篇', desc: '博客全面升级，开始系统性输出 .NET 后端架构与 C# 深度内容，持续分享修炼心得。', side: 'left' },
+            { year: '2025', title: '架构大成', desc: '主导完成公司核心系统微服务架构改造，深入实践 DDD 与领域事件，获得架构师认证。', side: 'right' },
+            { year: '2023', title: '修炼进阶', desc: '全面拥抱 .NET 8，深入 EF Core 性能调优与分布式系统设计，开始容器化与 K8s 探索。', side: 'left' },
+            { year: '2022', title: '初入江湖', desc: '以 .NET 后端开发身份踏入职场，在团队项目中磨练技艺，初尝高并发与系统调优。', side: 'right' },
+            { year: '2020', title: '入门修炼', desc: '偶然间接触到 C# 和 .NET，从此踏上后端修仙之路，从控制台程序一路修炼到 Web API。', side: 'left' }
         ];
 
         var typingTexts = [
-            '潜入代码深渊的小妖精',
-            '用CSS编织幻术的修行者',
-            '在像素丛林中修炼的妖怪',
-            '以键盘为法器的前端术士'
+            '在后端深渊里修炼的小妖',
+            '用 C# 编写咒语的术士',
+            '在 .NET 灵脉上筑基的修行者',
+            '以服务器为洞府的妖怪',
+            '拿 Docker 当法器的炼妖师'
         ];
 
         /* ====== 粒子系统 ====== */
@@ -571,16 +583,15 @@
             this.phase = Math.random() * Math.PI * 2;
             this.phaseSpeed = Math.random() * 0.02 + 0.006;
             var rand = Math.random();
-            if (rand < 0.68) { this.r = 0;   this.g = 255; this.b = 136; }
-            else if (rand < 0.88) { this.r = 255; this.g = 107; this.b = 53; }
-            else { this.r = 180; this.g = 255; this.b = 200; }
+            if (rand < 0.55)      { this.r = 0;   this.g = 255; this.b = 136; }
+            else if (rand < 0.75) { this.r = 81;  this.g = 43;  this.b = 212; }
+            else if (rand < 0.90) { this.r = 255; this.g = 107; this.b = 53;  }
+            else                  { this.r = 180; this.g = 255; this.b = 200; }
         }
 
         Particle.prototype.update = function() {
             this.phase += this.phaseSpeed;
             var alpha = (Math.sin(this.phase) + 1) / 2 * 0.7 + 0.1;
-
-            // 鼠标吸引
             var dx = mouseX - this.x;
             var dy = mouseY - this.y;
             var dist = Math.sqrt(dx * dx + dy * dy);
@@ -589,17 +600,14 @@
                 this.vx += (dx / dist) * force;
                 this.vy += (dy / dist) * force;
             }
-
             this.vx *= 0.992;
             this.vy *= 0.992;
             this.x += this.vx;
             this.y += this.vy;
-
             if (this.x < -20) this.x = canvas.width + 20;
             if (this.x > canvas.width + 20) this.x = -20;
             if (this.y < -20) this.y = canvas.height + 20;
             if (this.y > canvas.height + 20) this.y = -20;
-
             return alpha;
         };
 
@@ -613,7 +621,6 @@
             ctx.arc(x, y, glowR, 0, Math.PI * 2);
             ctx.fillStyle = grad;
             ctx.fill();
-
             ctx.beginPath();
             ctx.arc(x, y, Math.max(0.1, sz), 0, Math.PI * 2);
             ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + alpha.toFixed(3) + ')';
@@ -653,7 +660,7 @@
             glowEl.style.top  = e.clientY + 'px';
         });
 
-        /* ====== 打字机效果 ====== */
+        /* ====== 打字机 ====== */
         var typingEl = document.getElementById('typing-text');
         var tIdx = 0, cIdx = 0, isDeleting = false;
 
@@ -682,7 +689,7 @@
         }
         typeStep();
 
-        /* ====== 导航栏滚动效果 ====== */
+        /* ====== 导航栏 ====== */
         var navbar = document.getElementById('navbar');
         window.addEventListener('scroll', function() {
             if (window.scrollY > 60) navbar.classList.add('nav-scrolled');
@@ -699,9 +706,10 @@
             a.addEventListener('click', function() { mobileMenu.classList.add('hidden'); });
         });
 
-        /* ====== 生成文章卡片 ====== */
+        /* ====== 文章卡片 ====== */
         var articlesGrid = document.getElementById('articles-grid');
         articles.forEach(function(art, i) {
+            var isDotnet = (art.tag === '.NET' || art.tag === 'C#' || art.tag === 'EF Core');
             var card = document.createElement('article');
             card.className = 'tilt-card reveal rounded-xl overflow-hidden';
             card.style.cssText = 'background:var(--card);border:1px solid var(--border);transition:transform 0.1s ease,box-shadow 0.3s ease;';
@@ -712,7 +720,7 @@
                 '</div>' +
                 '<div class="p-5">' +
                     '<div class="flex items-center justify-between mb-3">' +
-                        '<span class="tag">' + art.tag + '</span>' +
+                        '<span class="tag' + (isDotnet ? ' tag-dotnet' : '') + '">' + art.tag + '</span>' +
                         '<span class="font-body text-xs" style="color:var(--fg-muted);">' + art.date + '</span>' +
                     '</div>' +
                     '<h3 class="font-display text-lg mb-2" style="color:var(--fg);">' + art.title + '</h3>' +
@@ -725,7 +733,6 @@
             articlesGrid.appendChild(card);
         });
 
-        /* 文章卡片3D倾斜 + 阅读更多 */
         document.querySelectorAll('.tilt-card').forEach(function(card) {
             card.addEventListener('mousemove', function(e) {
                 var rect = card.getBoundingClientRect();
@@ -742,20 +749,19 @@
             });
         });
 
-        /* 阅读更多按钮 → Toast */
         document.querySelectorAll('.read-more-btn').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 showToast('正在打开《' + btn.getAttribute('data-title') + '》...');
             });
         });
 
-        /* ====== 生成技能卡片 ====== */
+        /* ====== 技能卡片 ====== */
         var skillsGrid = document.getElementById('skills-grid');
         skills.forEach(function(sk, i) {
             var el = document.createElement('div');
             el.className = 'reveal skill-item rounded-xl p-5 flex items-center gap-4';
             el.style.cssText = 'background:var(--card);border:1px solid var(--border);';
-            el.setAttribute('data-delay', (i * 80).toString());
+            el.setAttribute('data-delay', (i * 70).toString());
             el.innerHTML =
                 '<div class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center text-xl" style="background:rgba(0,255,136,0.08);color:' + sk.accent + ';">' +
                     '<i class="' + sk.icon + '"></i>' +
@@ -766,13 +772,13 @@
                         '<span class="font-body text-xs" style="color:var(--accent);">' + sk.level + '%</span>' +
                     '</div>' +
                     '<div class="skill-bar">' +
-                        '<div class="skill-bar-fill" data-width="' + sk.level + '"></div>' +
+                        '<div class="skill-bar-fill" data-width="' + sk.level + '" style="background:linear-gradient(90deg,' + sk.accent + ',' + sk.accent + '88);"></div>' +
                     '</div>' +
                 '</div>';
             skillsGrid.appendChild(el);
         });
 
-        /* ====== 生成时间线 ====== */
+        /* ====== 时间线 ====== */
         var tlContainer = document.getElementById('timeline-container');
         timelineData.forEach(function(item, i) {
             var isLeft = item.side === 'left';
@@ -780,7 +786,6 @@
             el.className = 'reveal relative mb-12 md:mb-16';
             el.setAttribute('data-delay', (i * 120).toString());
 
-            // 移动端：全部靠右显示
             var mobileHTML =
                 '<div class="md:hidden pl-12">' +
                     '<div class="timeline-dot" style="left:20px;top:4px;"></div>' +
@@ -789,7 +794,6 @@
                     '<p class="font-body text-sm leading-relaxed" style="color:var(--fg-muted);">' + item.desc + '</p>' +
                 '</div>';
 
-            // 桌面端：左右交替
             var desktopHTML =
                 '<div class="hidden md:flex items-center">' +
                     (isLeft
@@ -814,14 +818,12 @@
             tlContainer.appendChild(el);
         });
 
-        /* ====== IntersectionObserver 滚动揭示 ====== */
+        /* ====== IntersectionObserver ====== */
         var revealObserver = new IntersectionObserver(function(entries) {
             entries.forEach(function(entry) {
                 if (entry.isIntersecting) {
                     var delay = parseInt(entry.target.getAttribute('data-delay') || '0', 10);
-                    setTimeout(function() {
-                        entry.target.classList.add('visible');
-                    }, delay);
+                    setTimeout(function() { entry.target.classList.add('visible'); }, delay);
                     revealObserver.unobserve(entry.target);
                 }
             });
@@ -831,7 +833,7 @@
             revealObserver.observe(el);
         });
 
-        /* ====== 技能进度条动画 ====== */
+        /* ====== 技能进度条 ====== */
         var skillObserver = new IntersectionObserver(function(entries) {
             entries.forEach(function(entry) {
                 if (entry.isIntersecting) {
@@ -839,7 +841,7 @@
                     fills.forEach(function(fill, i) {
                         setTimeout(function() {
                             fill.style.width = fill.getAttribute('data-width') + '%';
-                        }, i * 120);
+                        }, i * 100);
                     });
                     skillObserver.unobserve(entry.target);
                 }
@@ -848,7 +850,7 @@
 
         skillObserver.observe(skillsGrid);
 
-        /* ====== 统计数字递增动画 ====== */
+        /* ====== 统计数字 ====== */
         var statAnimated = false;
         var statObserver = new IntersectionObserver(function(entries) {
             entries.forEach(function(entry) {
@@ -882,7 +884,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
-        /* ====== Toast 通知 ====== */
+        /* ====== Toast ====== */
         function showToast(msg) {
             var old = document.querySelector('.toast-msg');
             if (old) old.remove();
@@ -897,7 +899,7 @@
             }, 2500);
         }
 
-        /* ====== 页脚社交图标点击反馈 ====== */
+        /* ====== 社交图标 ====== */
         document.querySelectorAll('.social-icon').forEach(function(icon) {
             icon.addEventListener('click', function(e) {
                 e.preventDefault();
