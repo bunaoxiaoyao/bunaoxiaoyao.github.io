@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>潮玩长沙 · 室内通关指南</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+  :root{--bg:#FBF6EE;--bg-warm:#F4E9D4;--paper:#FFFCF5;--ink:#2A1F1A;--ink-soft:#5A4A3F;--muted:#8B7D6F;--line:#E5D7BE;--red:#C8392E;--red-deep:#9E2B22;--gold:#E8A33D;--shadow:0 10px 40px -10px rgba(42,31,26,.18)}
+  *{-webkit-font-smoothing:antialiased}html{scroll-behavior:smooth}
+  body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden}
+  .font-serif{font-family:'Noto Serif SC',serif}.font-brush{font-family:'Ma Shan Zheng',cursive}
+  .paper-texture{background-image:radial-gradient(circle at 18% 22%,rgba(232,163,61,.1) 0%,transparent 45%),radial-gradient(circle at 82% 70%,rgba(200,57,46,.07) 0%,transparent 45%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E")}
+  .hero-glow{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;pointer-events:none;animation:float 16s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.1)}66%{transform:translate(-30px,25px) scale(.95)}}
+  .reveal{opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}.reveal.in{opacity:1;transform:translateY(0)}
+  .section-label{letter-spacing:.4em;text-transform:uppercase;font-size:11px;color:var(--muted)}
+  .stamp{display:inline-block;padding:6px 14px;border:2px solid var(--red);color:var(--red);font-family:'Noto Serif SC',serif;font-weight:700;transform:rotate(-3deg);background:rgba(200,57,46,.05)}
+  .hero-title{font-family:'Noto Serif SC',serif;font-weight:900;line-height:.92;letter-spacing:-.02em}
+  nav.top-nav{backdrop-filter:blur(12px);background:rgba(251,246,238,.88);border-bottom:1px solid var(--line);transition:box-shadow .3s}
+  nav.top-nav.scrolled{box-shadow:0 4px 24px -8px rgba(42,31,26,.12)}
+  .timeline-spine{position:absolute;left:78px;top:30px;bottom:30px;width:2px;background:linear-gradient(to bottom,transparent,var(--line) 4%,var(--line) 96%,transparent)}
+  @media(max-width:768px){.timeline-spine{left:28px}}
+  .timeline-dot{width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--red);box-shadow:0 0 0 4px var(--bg);transition:all .35s cubic-bezier(.2,.8,.2,1);z-index:2;position:relative}
+  .stop-card:hover .timeline-dot{transform:scale(1.4);background:var(--red)}
+  .stop-card.active .timeline-dot{transform:scale(1.5);background:var(--gold);border-color:var(--gold);box-shadow:0 0 0 4px var(--bg),0 0 0 8px rgba(232,163,61,.25)}
+  .stop-card{position:relative;transition:all .4s}
+  .stop-card .card-body{background:var(--paper);border:1px solid var(--line);border-radius:6px;transition:all .4s cubic-bezier(.2,.8,.2,1)}
+  .stop-card:hover .card-body{box-shadow:var(--shadow);border-color:rgba(200,57,46,.3)}
+  .stop-card.active .card-body{border-color:var(--red);box-shadow:0 12px 36px -8px rgba(200,57,46,.2)}
+  .step-num{font-family:'Noto Serif SC',serif;font-weight:900;font-size:64px;line-height:1;color:transparent;-webkit-text-stroke:1.5px var(--red);opacity:.5;transition:all .4s}
+  .stop-card.active .step-num{color:var(--red);opacity:1}
+  .type-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;font-size:11px;border-radius:2px;font-weight:500}
+  .type-tag.早餐{background:rgba(232,163,61,.15);color:#9E6B14}.type-tag.潮玩{background:rgba(200,57,46,.1);color:var(--red)}.type-tag.午餐{background:rgba(232,163,61,.15);color:#9E6B14}.type-tag.刺激{background:rgba(200,57,46,.1);color:var(--red)}.type-tag.下午茶{background:rgba(232,163,61,.15);color:#9E6B14}.type-tag.晚餐{background:rgba(200,57,46,.1);color:var(--red)}
+  .activity-box{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:14px 16px;transition:all .3s}.activity-box:hover{border-color:var(--red);background:rgba(200,57,46,.03);transform:translateY(-2px)}
+  .photo-box{display:flex;gap:14px;padding:12px 14px;background:var(--bg);border-left:3px solid var(--gold);border-radius:0 4px 4px 0;transition:all .3s}.photo-box:hover{background:rgba(232,163,61,.08);transform:translateX(4px)}
+  .food-tag{display:inline-block;padding:3px 9px;background:var(--bg-warm);border:1px solid var(--line);color:var(--ink-soft);font-size:11px;border-radius:2px}
+  .tip-li{position:relative;padding-left:14px;color:var(--ink-soft);font-size:13px;line-height:1.7}.tip-li::before{content:'';position:absolute;left:0;top:9px;width:5px;height:5px;background:var(--gold);border-radius:50%}
+  .address-bar{background:var(--bg-warm);border:1px dashed var(--line);border-radius:4px;padding:10px 14px}
+  .copy-btn{cursor:pointer;transition:all .2s}.copy-btn:hover{color:var(--red)}.copy-btn.copied{color:var(--green,#1F4D3A)}
+  .transport-bar{background:linear-gradient(90deg,rgba(232,163,61,.06),transparent);border-left:3px solid var(--gold);padding:10px 14px;border-radius:0 4px 4px 0}
+  #map{height:600px;border-radius:6px;border:1px solid var(--line);filter:sepia(.18) saturate(.92) contrast(.98)}
+  .leaflet-container{background:#F4E9D4;font-family:'Noto Sans SC',sans-serif}
+  .leaflet-popup-content-wrapper{background:var(--paper);border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow)}.leaflet-popup-content{margin:14px 16px;font-family:'Noto Sans SC',sans-serif}.leaflet-popup-tip{background:var(--paper);border:1px solid var(--line)}
+  .leaflet-control-zoom a{background:var(--paper)!important;color:var(--ink)!important;border-color:var(--line)!important}.leaflet-control-zoom a:hover{background:var(--bg-warm)!important}.leaflet-control-attribution{background:rgba(251,246,238,.8)!important;color:var(--muted)!important;font-size:10px!important}
+  .marker-pin{width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2.5px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.25);transition:transform .3s}.marker-pin span{transform:rotate(45deg);color:#fff;font-weight:700;font-size:14px;font-family:'Noto Serif SC',serif}
+  .marker-pin.red{background:var(--red)}.marker-pin.gold{background:var(--gold)}.marker-pin.active{transform:rotate(-45deg) scale(1.25)}.marker-pin.active::after{content:'';position:absolute;inset:-8px;border-radius:50%;border:2px solid currentColor;animation:pulse 1.5s ease-out infinite;opacity:.6}.marker-pin.red.active{color:var(--red)}.marker-pin.gold.active{color:var(--gold)}
+  @keyframes pulse{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.6);opacity:0}}
+  .map-list-item{transition:all .2s}.map-list-item:hover{background:var(--bg-warm)}.map-list-item.active{background:var(--bg-warm);border-left:3px solid var(--red)}
+  .progress-bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}.progress-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--gold));border-radius:3px;transition:width 1.5s cubic-bezier(.2,.8,.2,1)}
+  .food-card{background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden;transition:all .4s}.food-card:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:var(--red)}
+  .food-card .img-wrap{height:160px;overflow:hidden;background:var(--bg-warm)}.food-card img{width:100%;height:100%;object-fit:cover;transition:transform .8s;filter:sepia(.12) saturate(1.1)}.food-card:hover img{transform:scale(1.08)}
+  .food-card .badge{position:absolute;top:10px;left:10px;background:var(--red);color:#fff;font-family:'Noto Serif SC',serif;font-weight:700;padding:3px 9px;font-size:11px;border-radius:2px}
+  .tip-card{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:24px;transition:all .4s}.tip-card:hover{border-color:var(--red);transform:translateY(-4px);box-shadow:var(--shadow)}
+  .tip-card .icon-wrap{width:44px;height:44px;background:var(--bg-warm);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:18px;margin-bottom:14px;transition:all .4s}.tip-card:hover .icon-wrap{background:var(--red);color:#fff}
+  .route-line{display:flex;align-items:center;gap:0;flex-wrap:nowrap;overflow-x:auto;padding:8px 0}
+  .route-stop{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:90px}.route-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif SC',serif;font-weight:700;font-size:13px;color:#fff}
+  .route-arrow{flex-shrink:0;color:var(--muted);font-size:12px;padding:0 4px}
+  ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body class="paper-texture">
+
+<nav class="top-nav fixed top-0 left-0 right-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-[var(--red)] text-white flex items-center justify-center font-serif font-bold text-lg rounded-sm">潮</div>
+      <div><div class="font-serif font-bold text-base leading-tight">潮玩长沙</div><div class="text-[10px] tracking-widest text-[var(--muted)]">INDOOR GUIDE · 01</div></div>
+    </div>
+    <div class="hidden md:flex items-center gap-8 text-sm">
+      <a href="#route" class="hover:text-[var(--red)] transition">路线</a>
+      <a href="#itinerary" class="hover:text-[var(--red)] transition">详细行程</a>
+      <a href="#map-section" class="hover:text-[var(--red)] transition">地图</a>
+      <a href="#food" class="hover:text-[var(--red)] transition">美食</a>
+      <a href="#tips" class="hover:text-[var(--red)] transition">贴士</a>
+    </div>
+    <div class="text-xs text-[var(--muted)] hidden sm:flex items-center gap-2"><i class="far fa-clock"></i><span>09:00 — 21:00 · 6 站</span></div>
+  </div>
+</nav>
+
+<section class="relative pt-32 pb-20 overflow-hidden">
+  <div class="hero-glow" style="width:560px;height:560px;background:var(--red);top:-140px;left:-120px;"></div>
+  <div class="hero-glow" style="width:420px;height:420px;background:var(--gold);top:160px;right:-100px;animation-delay:-5s;"></div>
+  <div class="max-w-7xl mx-auto px-6 relative">
+    <div class="grid lg:grid-cols-12 gap-10 items-end">
+      <div class="lg:col-span-8">
+        <div class="flex items-center gap-4 mb-8 reveal flex-wrap">
+          <span class="stamp">室内通关</span><span class="section-label">Indoor Changsha</span><span class="text-[var(--muted)] text-xs">·  No.01 · 潮玩线</span>
+        </div>
+        <h1 class="hero-title text-[64px] md:text-[112px] reveal">躲进室内<br><span class="text-[var(--red)]">玩翻</span><span class="font-brush text-[var(--gold)] text-[48px] md:text-[80px] ml-3">长沙</span></h1>
+        <p class="mt-8 text-lg text-[var(--ink-soft)] max-w-2xl leading-relaxed reveal">卡丁车、密室逃脱、剧本杀、复古文和友 —— 防晒避雨的一天，从早到晚不重样。<br>每站标了详细地址、到达方式、玩什么、吃附近什么，复制地址到高德就能出发。</p>
+        <div class="mt-10 flex flex-wrap gap-4 reveal">
+          <a href="#itinerary" class="inline-flex items-center gap-2 bg-[var(--red)] text-white px-7 py-3.5 rounded-sm font-medium hover:bg-[var(--red-deep)] transition group">开始通关 <i class="fas fa-arrow-right group-hover:translate-x-1 transition"></i></a>
+          <a href="#map-section" class="inline-flex items-center gap-2 border-2 border-[var(--ink)] text-[var(--ink)] px-7 py-3.5 rounded-sm font-medium hover:bg-[var(--ink)] hover:text-[var(--bg)] transition"><i class="far fa-map"></i> 查看地图</a>
+        </div>
+      </div>
+      <div class="lg:col-span-4 reveal">
+        <div class="bg-[var(--paper)] border border-[var(--line)] p-6 rounded-sm shadow-sm">
+          <div class="flex justify-between items-center pb-4 border-b border-[var(--line)]"><span class="section-label">通关总览</span><i class="fas fa-gamepad text-[var(--red)]"></i></div>
+          <div class="grid grid-cols-3 gap-4 text-center py-5">
+            <div><div class="font-serif font-black text-3xl text-[var(--red)]" data-count="6">0</div><div class="text-xs text-[var(--muted)] mt-1">站点</div></div>
+            <div><div class="font-serif font-black text-3xl text-[var(--gold)]"><span data-count="12">0</span>h</div><div class="text-xs text-[var(--muted)] mt-1">时长</div></div>
+            <div><div class="font-serif font-black text-3xl text-[var(--red)]">4</div><div class="text-xs text-[var(--muted)] mt-1">室内项目</div></div>
+          </div>
+          <div class="pt-4 border-t border-[var(--line)]"><div class="flex justify-between text-xs text-[var(--muted)] mb-2"><span>刺激指数</span><span>★★★★☆</span></div><div class="progress-bar"><div class="progress-fill" style="width:0%" data-width="85%"></div></div></div>
+          <div class="mt-4 pt-4 border-t border-[var(--line)] flex justify-between items-center text-xs text-[var(--muted)]"><span>建议预算</span><span class="text-[var(--ink)] font-medium">¥400 - 700 / 人</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="route" class="py-16 bg-[var(--bg-warm)]">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="mb-10 reveal"><div class="section-label mb-3">00 — 路线总览</div><h2 class="font-serif font-black text-4xl md:text-5xl">室内一条线，全程不淋雨</h2><p class="mt-4 text-sm text-[var(--ink-soft)] max-w-2xl leading-relaxed">6个站点全部为室内或有遮盖区域，集中在五一广场周边3公里范围内。最远一段是去万家丽玩卡丁车，地铁直达。其余步行可达。</p></div>
+    <div class="bg-[var(--paper)] border border-[var(--line)] rounded-sm p-6 md:p-8 reveal"><div class="route-line" id="route-line"></div></div>
+  </div>
+</section>
+
+<section id="itinerary" class="py-20 relative">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-16 gap-6 reveal">
+      <div><div class="section-label mb-3">01 — 详细行程</div><h2 class="font-serif font-black text-5xl md:text-6xl">傻瓜式跟着玩</h2></div>
+      <div class="text-sm text-[var(--muted)] max-w-xs md:text-right leading-relaxed">每站包含：详细地址、到达方式、必玩项目、拍照机位、附近美食、实用贴士</div>
+    </div>
+    <div class="relative" id="itinerary-list"><div class="timeline-spine"></div></div>
+  </div>
+</section>
+
+<section id="map-section" class="py-20 bg-[var(--bg-warm)]">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12 gap-6 reveal">
+      <div><div class="section-label mb-3">02 — 行程地图</div><h2 class="font-serif font-black text-5xl md:text-6xl">六点一线<span class="text-[var(--red)]">.</span></h2></div>
+      <div class="text-sm text-[var(--muted)] max-w-sm leading-relaxed">点击标点查看详情，点击右侧列表可定位。</div>
+    </div>
+    <div class="grid lg:grid-cols-12 gap-6 reveal">
+      <div class="lg:col-span-8"><div id="map" class="shadow-sm"></div></div>
+      <div class="lg:col-span-4"><div class="bg-[var(--paper)] border border-[var(--line)] rounded-sm p-5 h-full"><div class="flex items-center justify-between pb-3 border-b border-[var(--line)] mb-3"><span class="section-label">站点速查</span><i class="fas fa-list-ol text-[var(--red)]"></i></div><div class="space-y-1 max-h-[560px] overflow-y-auto pr-1" id="map-list"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="food" class="py-20 relative">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12 gap-6 reveal">
+      <div><div class="section-label mb-3">03 — 必吃清单</div><h2 class="font-serif font-black text-5xl md:text-6xl">边玩<span class="text-[var(--red)]">边吃</span></h2></div>
+      <div class="text-sm text-[var(--muted)] max-w-sm leading-relaxed">每站附近步行5分钟内可达的高分小吃，不用专门绕路。</div>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal" id="food-grid"></div>
+  </div>
+</section>
+
+<section id="tips" class="py-20 bg-[var(--bg-warm)]">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12 gap-6 reveal">
+      <div><div class="section-label mb-3">04 — 实用贴士</div><h2 class="font-serif font-black text-5xl md:text-6xl">少踩坑，多通关</h2></div>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal">
+      <div class="tip-card"><div class="icon-wrap"><i class="fas fa-tshirt"></i></div><h3 class="font-serif font-bold text-lg mb-2">着装</h3><p class="text-sm text-[var(--ink-soft)] leading-relaxed mb-4">密室和卡丁车都要穿方便活动的衣服，别穿裙子。卡丁车需穿包头鞋（运动鞋最佳），现场不提供。</p><ul class="space-y-1.5"><li class="tip-li">密室可能要爬要跑，穿长裤</li><li class="tip-li">卡丁车长发需扎起来</li><li class="tip-li">文和友空调足，带薄外套</li></ul></div>
+      <div class="tip-card"><div class="icon-wrap"><i class="fas fa-mobile-alt"></i></div><h3 class="font-serif font-bold text-lg mb-2">预约</h3><p class="text-sm text-[var(--ink-soft)] leading-relaxed mb-4">密室逃脱和剧本杀必须提前预约，尤其周末。卡丁车可现场买票但建议提前电话确认赛道空闲。</p><ul class="space-y-1.5"><li class="tip-li">密室提前1-2天美团预约</li><li class="tip-li">剧本杀提前组好队</li><li class="tip-li">文和友小程序提前取号</li></ul></div>
+      <div class="tip-card"><div class="icon-wrap"><i class="fas fa-coins"></i></div><h3 class="font-serif font-bold text-lg mb-2">预算</h3><p class="text-sm text-[var(--ink-soft)] leading-relaxed mb-4">室内项目是这篇攻略的主要开销，建议提前做好心理准备。餐饮部分反而比景区便宜。</p><ul class="space-y-1.5"><li class="tip-li">卡丁车约 80-120 元/节</li><li class="tip-li">密室逃脱 128-168 元/人</li><li class="tip-li">剧本杀 168-268 元/人</li></ul></div>
+      <div class="tip-card"><div class="icon-wrap"><i class="fas fa-exclamation-triangle"></i></div><h3 class="font-serif font-bold text-lg mb-2">注意</h3><p class="text-sm text-[var(--ink-soft)] leading-relaxed mb-4">卡丁车有身高限制（通常145cm以上），心脏病人、孕妇不建议玩。恐怖密室有心理承受门槛，胆小可选悬疑主题。</p><ul class="space-y-1.5"><li class="tip-li">卡丁车需戴头盔和头套</li><li class="tip-li">密室别带贵重物品</li><li class="tip-li">剧本杀别迟到，全队等</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<footer class="py-12 border-t border-[var(--line)]">
+  <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div><div class="flex items-center gap-3 mb-2"><div class="w-8 h-8 bg-[var(--red)] text-white flex items-center justify-center font-serif font-bold rounded-sm">潮</div><span class="font-serif font-bold">潮玩长沙 · 室内通关指南</span></div><p class="text-xs text-[var(--muted)] max-w-md leading-relaxed">防晒避雨的一天，从卡丁车到密室逃脱，从臭豆腐到口味虾。</p></div>
+    <div class="text-right"><div class="font-brush text-2xl text-[var(--red)]">玩得嗨 · 吃得辣</div><div class="text-xs text-[var(--muted)] mt-2 tracking-widest">CHANGSHA INDOOR · 2025</div></div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const itinerary=[
+  {id:1,time:'09:00',duration:'1小时',name:'公交新村粉店',subtitle:'长沙人早餐的灵魂 · 原汤肉丝粉',type:'早餐',color:'gold',icon:'fa-utensils',
+   address:'天心区公交新村',fullAddress:'湖南省长沙市天心区公交新村(公交新村粉店)',
+   coords:[28.1935,112.9755],
+   transport:{from:'起点',method:'地铁',detail:'地铁1号线至「南门口」站3号口出，沿城南路步行约300米即到',distance:'市中心出发',duration:'约15分钟'},
+   desc:'长沙本地人排队的粉店，不是网红店，是"居民楼楼下开了二十年的老店"。扁粉+原汤肉丝码子+酸豆角，长沙人一天的开始就是这一碗。店面简陋但味道地道，早上来一碗暖胃又管饱。',
+   activities:[
+     {name:'吃原汤肉丝粉',duration:'20分钟',detail:'招牌必点。扁粉滑嫩，肉丝码子分量足，汤头鲜甜'},
+     {name:'加酸豆角和剁椒',duration:'5分钟',detail:'自助调料台，按口味加，长沙人标配'},
+     {name:'配一根油条',duration:'5分钟',detail:'油条蘸汤吃，碳水加倍快乐'}
+   ],
+   photoSpots:[
+     {name:'粉店门口排队场景',tip:'早上人多，排队本身就是长沙烟火气的画面'},
+     {name:'一碗粉特写',tip:'俯拍，把肉丝码子和葱花拍清楚'}
+   ],
+   food:[{name:'原汤肉丝粉',shop:'公交新村粉店',price:'12元'},{name:'油条',shop:'公交新村粉店',price:'3元'}],
+   tips:['早上7点开门，9点前去人少','只收现金或微信，不收支付宝','店面在居民楼一楼，别走过','吃完出发，步行至南门口地铁站']},
+  {id:2,time:'10:30',duration:'2小时',name:'摩星卡丁车俱乐部',subtitle:'室内赛道 · 时速60+ · 解压神器',type:'潮玩',color:'red',icon:'fa-car',
+   address:'芙蓉区万家丽国际MALL',fullAddress:'湖南省长沙市芙蓉区万家丽国际MALL(摩星卡丁车俱乐部)',
+   coords:[28.2185,112.9985],
+   transport:{from:'公交新村粉店',method:'地铁',detail:'步行至「南门口」站，乘地铁1号线至「万家丽广场」站4号口出，进入万家丽MALL上楼',distance:'约6公里',duration:'约30分钟'},
+   desc:'长沙最高规格的室内卡丁车馆，专业赛道设计，比利时进口车架，最高时速60+。室内恒温无日晒雨淋，全程有专业计时系统，跑完出成绩单。新手老手都能玩，是长沙年轻人周末解压的首选。',
+   activities:[
+     {name:'赛道驾驶体验',duration:'8分钟/节',detail:'8字弯+直道+发卡弯，每节8分钟，一般买2-3节'},
+     {name:'计时挑战赛',duration:'8分钟',detail:'电子计时系统，跑完出成绩单，可和朋友PK'},
+     {name:'观赛台看朋友跑',duration:'随时',detail:'二楼观赛区可俯瞰全赛道，拍照拍视频绝佳'}
+   ],
+   photoSpots:[
+     {name:'赛道全景',tip:'二楼观赛区俯拍，赛车道+车手画面'},
+     {name:'头盔照',tip:'出发前戴头盔在车旁拍，帅气'},
+     {name:'成绩单',tip:'跑完拿成绩单拍照，炫耀用'}
+   ],
+   food:[],
+   tips:['必须穿运动鞋（包头鞋），别穿凉鞋拖鞋','长发需扎起来或塞进头盔','一节8分钟，建议买2-3节才过瘾','新手有教练简单教学','心脏病、高血压、孕妇不建议玩','身高需145cm以上','周末人多需排队，建议工作日去']},
+  {id:3,time:'13:00',duration:'1.5小时',name:'太平老街午餐',subtitle:'臭豆腐+糖油粑粑+刮凉粉 · 小吃三连击',type:'午餐',color:'gold',icon:'fa-utensils',
+   address:'天心区太平街',fullAddress:'湖南省长沙市天心区太平街(北起五一大道，南至解放西路)',
+   coords:[28.1967,112.9737],
+   transport:{from:'摩星卡丁车',method:'地铁',detail:'从万家丽MALL步行至「万家丽广场」站，乘地铁2号线至「五一广场」站9号口出，向南步行200米到太平街北口',distance:'约6公里',duration:'约25分钟'},
+   desc:'长沙最经典的美食一条街，375米青石板路走一遍，把长沙小吃全尝了。从臭豆腐到糖油粑粑到刮凉粉，一站吃遍。吃完顺便逛逛贾谊故居和文创店，消消食再出发。',
+   activities:[
+     {name:'吃黑色经典臭豆腐',duration:'10分钟',detail:'太平街北段，黑色外焦内嫩，浇蒜汁辣椒'},
+     {name:'吃金记糖油粑粑',duration:'10分钟',detail:'街中段，现炸现卖，趁热吃外脆内糯'},
+     {name:'吃刮凉粉',duration:'10分钟',detail:'街边流动摊，酸辣冰凉，夏天解暑神器'},
+     {name:'逛贾谊故居',duration:'20分钟',detail:'街中段，免费参观，看太傅祠和古井'},
+     {name:'逛文创店',duration:'30分钟',detail:'各种长沙主题文创，冰箱贴明信片'}
+   ],
+   photoSpots:[
+     {name:'太平街北牌坊',tip:'石牌坊是地标，仰拍带天空'},
+     {name:'青石板路透视',tip:'街中段往南拍，木质门面纵深透视'},
+     {name:'臭豆腐特写',tip:'刚出锅拍，黑亮外表+冒热气'}
+   ],
+   food:[{name:'臭豆腐',shop:'黑色经典',price:'10元'},{name:'糖油粑粑',shop:'金记糖油佗佗',price:'8元'},{name:'刮凉粉',shop:'街边摊',price:'8元'}],
+   tips:['从北口进南口出，顺路','别在第一家买，往里走味道更优','避开12:30-13:30饭点高峰','贾谊故居周一闭馆','茶颜悦色街上有多家，不用专门找']},
+  {id:4,time:'14:30',duration:'2.5小时',name:'长藤鬼校恐怖密室',subtitle:'全国密室天花板 · 沉浸式校园恐怖',type:'刺激',color:'red',icon:'fa-ghost',
+   address:'芙蓉区五一大道',fullAddress:'湖南省长沙市芙蓉区五一大道(长藤鬼校密室逃脱五一广场店)',
+   coords:[28.1990,112.9760],
+   transport:{from:'太平老街',method:'步行',detail:'从太平街南口出，沿解放西路向东步行至五一大道右转，走约400米即到',distance:'约600米',duration:'约8分钟'},
+   desc:'长沙密室逃脱的天花板，全国连锁的头部品牌。校园恐怖主题+专业NPC飙戏+大型机械机关，沉浸感拉满。长沙店是旗舰店，面积和场景远超其他城市分店。不是解谜密室，是"体验型"密室，考验胆量。',
+   activities:[
+     {name:'沉浸式恐怖体验',duration:'120分钟',detail:'换校服入场，全程NPC互动，校园恐怖剧情'},
+     {name:'单线任务',duration:'穿插',detail:'部分玩家会被单独拉去做任务，考验胆量'},
+     {name:'拍照环节',duration:'10分钟',detail:'结束后可和NPC合影'}
+   ],
+   photoSpots:[
+     {name:'入口校服合影',tip:'换好校服在入口拍，紧张感拉满'},
+     {name:'结束后NPC合影',tip:'通关后和NPC合照，对比反差大'},
+     {name:'成绩单/通关证书',tip:'有的主题会发通关证，拍照留恋'}
+   ],
+   food:[],
+   tips:['必须提前在美团/大众点评预约场次','有多个主题可选，新手选"微恐"档','穿方便活动的衣服和运动鞋','别带贵重物品，存柜免费','心脏病、高血压、孕妇不建议玩','全程禁止玩手机（会被没收）','队友很重要，组满人体验更好']},
+  {id:5,time:'17:30',duration:'1小时',name:'IFS国金中心 · KAWS',subtitle:'下午茶 + 巨型KAWS合影',type:'下午茶',color:'gold',icon:'fa-mug-hot',
+   address:'芙蓉区中山路589号',fullAddress:'湖南省长沙市芙蓉区中山路589号长沙IFS国金中心',
+   coords:[28.2006,112.9773],
+   transport:{from:'长藤鬼校',method:'步行',detail:'从密室出来沿五一大道向西步行约400米至IFS国金中心',distance:'约400米',duration:'约5分钟'},
+   desc:'长沙最高楼，7楼空中花园有巨型KAWS雕塑（高8米）。跑完密室来这歇歇脚，喝杯茶颜悦色，拍拍照，空调吹吹，为接下来的晚餐养精蓄锐。',
+   activities:[
+     {name:'KAWS雕塑合影',duration:'15分钟',detail:'7楼空中花园，巨型灰色BFF，长沙必拍地标'},
+     {name:'喝茶颜悦色',duration:'15分钟',detail:'L3或L7都有，幽兰拿铁+声声乌龙'},
+     {name:'商场逛逛歇脚',duration:'30分钟',detail:'一线品牌齐全，空调舒适'}
+   ],
+   photoSpots:[
+     {name:'KAWS正面合影',tip:'7楼花园，蹲下仰拍，人和雕塑一起框进去'},
+     {name:'空中花园城市背景',tip:'靠栏杆侧身，背景是五一广场天际线'},
+     {name:'商场中庭俯拍',tip:'从上往下拍螺旋形中庭，几何感强'}
+   ],
+   food:[{name:'幽兰拿铁',shop:'茶颜悦色IFS店',price:'20元'}],
+   tips:['KAWS在7楼，商场指引电梯直达','工作日去人少，周末拍照要排队','空中花园免费，风大注意头发','商场空调足，带薄外套']},
+  {id:6,time:'18:30',duration:'2.5小时',name:'超级文和友',subtitle:'80年代怀旧市井 · 口味虾 · 拍照圣地',type:'晚餐',color:'red',icon:'fa-pepper-hot',
+   address:'天心区人民西路166号海信广场',fullAddress:'湖南省长沙市天心区人民西路166号海信广场(超级文和友)',
+   coords:[28.1986,112.9711],
+   transport:{from:'IFS国金中心',method:'步行',detail:'从IFS南门出，沿黄兴路向南走到人民西路左转，走约400米到海信广场',distance:'约700米',duration:'约10分钟'},
+   desc:'海信广场内的"市井楼"，7层楼完全还原80年代长沙老巷子——理发店、录像厅、老茶馆一应俱全。必点：口味虾、臭豆腐、猪油拌粉。拍照胜过吃饭，但味道也不差。一天收尾的最佳地点——吃得好、拍得爽、逛得够。',
+   activities:[
+     {name:'7层楼怀旧场景拍照',duration:'40分钟',detail:'每层不同主题：理发店、录像厅、老茶馆、街机厅'},
+     {name:'吃口味虾',duration:'30分钟',detail:'招牌必点，麻辣鲜香，配啤酒绝了'},
+     {name:'吃猪油拌粉+臭豆腐',duration:'20分钟',detail:'两样加起来不到30元，简单却惊艳'},
+     {name:'老式街机游戏',duration:'15分钟',detail:'楼内有复古街机，投币玩'},
+     {name:'霓虹楼梯打卡',duration:'15分钟',detail:'楼层间楼梯霓虹灯管，赛博朋克感'}
+   ],
+   photoSpots:[
+     {name:'入口老巷子',tip:'进门复古巷子，红灯笼+老招牌，第一拍'},
+     {name:'楼层间俯拍',tip:'上到5楼往下拍，层层叠叠的霓虹和老阳台'},
+     {name:'理发店场景',tip:'3楼老理发店，坐椅子上拍侧脸'},
+     {name:'霓虹楼梯',tip:'楼层间楼梯霓虹灯管，仰拍'}
+   ],
+   food:[{name:'口味虾',shop:'文和友',price:'168元/份'},{name:'臭豆腐',shop:'文和友',price:'10元'},{name:'猪油拌粉',shop:'文和友',price:'12元'}],
+   tips:['务必提前在「文和友」小程序线上取号','周末等位2小时起，工作日30分钟','进去后别急着点餐，先逛完每一层','口味虾辣度可选，第一次去选中辣','拍人像用广角，复古场景适合大场景','海信广场地下有停车场，自驾方便']}
+];
+
+document.getElementById('route-line').innerHTML=itinerary.map((p,i)=>`
+  <div class="route-stop"><div class="route-dot" style="background:${p.color==='red'?'var(--red)':'var(--gold)'}">${p.id}</div><div class="text-[10px] text-center leading-tight"><div class="font-medium text-[var(--ink)]">${p.name.length>6?p.name.substring(0,5)+'…':p.name}</div><div class="text-[var(--muted)]">${p.time}</div></div></div>
+  ${i<itinerary.length-1?`<div class="route-arrow"><i class="fas fa-chevron-right"></i></div>`:''}
+`).join('');
+
+document.getElementById('itinerary-list').innerHTML+=itinerary.map(p=>`
+  <div class="stop-card relative flex items-start gap-6 md:gap-8 mb-8" data-id="${p.id}" data-coords="${p.coords.join(',')}">
+    <div class="flex flex-col items-center flex-shrink-0" style="width:90px;"><div class="font-serif font-bold text-xl text-[var(--ink)]">${p.time}</div><div class="text-[10px] text-[var(--muted)] mt-0.5 mb-3">${p.duration}</div><div class="timeline-dot"></div></div>
+    <div class="card-body flex-1 p-6 md:p-8">
+      <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
+        <div class="flex items-start gap-5"><div class="step-num">${String(p.id).padStart(2,'0')}</div><div>
+          <div class="flex items-center gap-3 mb-2 flex-wrap"><span class="type-tag ${p.type}">${p.type}</span><span class="text-xs text-[var(--muted)]"><i class="fas ${p.icon} mr-1"></i> 第 ${p.id} 站 / 共 6 站</span></div>
+          <h3 class="font-serif font-black text-2xl md:text-3xl leading-tight">${p.name}</h3><p class="text-sm text-[var(--muted)] mt-1">${p.subtitle}</p>
+        </div></div>
+      </div>
+      <div class="address-bar mb-3 flex items-center gap-3 flex-wrap"><i class="fas fa-map-marker-alt text-[var(--red)]"></i><span class="text-sm font-medium text-[var(--ink)]">${p.fullAddress}</span><button class="copy-btn text-xs text-[var(--muted)] ml-auto flex items-center gap-1" onclick="copyAddress('${p.fullAddress}',this)"><i class="far fa-copy"></i> <span>复制地址</span></button></div>
+      <div class="transport-bar mb-5 flex items-start gap-3 flex-wrap text-sm"><div class="flex items-center gap-2 text-[var(--gold)] font-medium flex-shrink-0" style="color:#9E6B14"><i class="fas fa-route"></i> 从${p.transport.from}</div><div class="text-[var(--ink-soft)] flex-1 min-w-0">${p.transport.detail}<span class="text-[var(--muted)] text-xs ml-2">· ${p.transport.distance} · ${p.transport.duration}</span></div></div>
+      <p class="text-[15px] text-[var(--ink-soft)] leading-relaxed mb-6">${p.desc}</p>
+      <div class="mb-6"><h4 class="font-serif font-bold text-base mb-3 flex items-center gap-2"><i class="fas fa-star text-[var(--gold)] text-sm"></i> 必玩项目 <span class="text-xs font-normal text-[var(--muted)] ml-1">共 ${p.activities.length} 项</span></h4><div class="grid sm:grid-cols-2 gap-3">${p.activities.map(a=>`<div class="activity-box"><div class="flex items-start justify-between gap-2 mb-1"><span class="font-medium text-sm text-[var(--ink)]">${a.name}</span><span class="text-xs text-[var(--muted)] whitespace-nowrap">${a.duration}</span></div><p class="text-xs text-[var(--ink-soft)] leading-relaxed">${a.detail}</p></div>`).join('')}</div></div>
+      <div class="mb-6"><h4 class="font-serif font-bold text-base mb-3 flex items-center gap-2"><i class="fas fa-camera-retro text-[var(--red)] text-sm"></i> 拍照机位 · 景色推荐</h4><div class="space-y-2">${p.photoSpots.map(ps=>`<div class="photo-box"><i class="fas fa-image text-[var(--gold)] mt-1 flex-shrink-0"></i><div class="flex-1 min-w-0"><span class="font-medium text-sm text-[var(--ink)]">${ps.name}</span><span class="text-xs text-[var(--ink-soft)] ml-2">— ${ps.tip}</span></div></div>`).join('')}</div></div>
+      ${p.food.length>0?`<div class="mb-6"><h4 class="font-serif font-bold text-base mb-3 flex items-center gap-2"><i class="fas fa-utensils text-[var(--red)] text-sm"></i> 必吃推荐</h4><div class="flex flex-wrap gap-2">${p.food.map(f=>`<span class="food-tag">${f.name} · ${f.shop} · ${f.price}</span>`).join('')}</div></div>`:''}
+      <div class="pt-5 border-t border-[var(--line)]"><h4 class="font-serif font-bold text-base mb-3 flex items-center gap-2"><i class="fas fa-lightbulb text-[var(--gold)] text-sm"></i> 实用贴士</h4><div class="grid sm:grid-cols-2 gap-x-6 gap-y-1.5">${p.tips.map(t=>`<div class="tip-li">${t}</div>`).join('')}</div></div>
+      <div class="mt-6 pt-4 border-t border-[var(--line)] flex justify-end"><button class="text-sm text-[var(--ink-soft)] hover:text-[var(--red)] flex items-center gap-2 transition" onclick="focusOnMap(${p.id})"><i class="fas fa-map-marker-alt"></i> 在地图上查看位置</button></div>
+    </div>
+  </div>
+`).join('');
+
+document.getElementById('map-list').innerHTML=itinerary.map(p=>`
+  <div class="map-list-item flex items-center gap-3 p-2.5 rounded-sm cursor-pointer" data-id="${p.id}" onclick="focusOnMap(${p.id})"><div class="w-7 h-7 rounded-full flex items-center justify-center font-serif font-bold text-xs flex-shrink-0 text-white" style="background:${p.color==='red'?'var(--red)':'var(--gold)'}">${p.id}</div><div class="flex-1 min-w-0"><div class="font-medium text-sm truncate">${p.name}</div><div class="text-[10px] text-[var(--muted)]">${p.time} · ${p.type}</div></div><i class="fas fa-chevron-right text-[var(--muted)] text-xs"></i></div>
+`).join('');
+
+const foodData=[
+  {name:'原汤肉丝粉',sub:'公交新村 · 二十年老店',badge:'早餐',desc:'扁粉滑嫩，肉丝码子分量足，汤头鲜甜。长沙人一天的开始就是这一碗。',shop:'公交新村粉店',img:'noodle',time:'第1站'},
+  {name:'臭豆腐',sub:'黑色经典 · 外焦内嫩',badge:'招牌',desc:'长沙名片级小吃，黑如墨、香似乳。浇上蒜汁辣椒萝卜干，一口爆汁。',shop:'黑色经典',img:'stinky',time:'第3站 太平街'},
+  {name:'糖油粑粑',sub:'金记 · 现炸现卖',badge:'甜品',desc:'糯米粉团炸到金黄，再裹一层糖稀。外脆内糯，趁热吃才不粘牙。',shop:'金记糖油佗佗',img:'tangyou',time:'第3站 太平街'},
+  {name:'幽兰拿铁',sub:'茶颜悦色 · 长沙限定',badge:'国民',desc:'只在长沙才能喝到。奶香茶醇，顶上一抹碧根果碎。',shop:'茶颜悦色 IFS店',img:'tea',time:'第5站 IFS'},
+  {name:'口味虾',sub:'文和友 · 麻辣鲜香',badge:'必点',desc:'长沙夜宵的灵魂。红亮油润，麻、辣、鲜、香四味齐发，配啤酒刚好。',shop:'超级文和友',img:'crayfish',time:'第6站 文和友'},
+  {name:'猪油拌粉',sub:'文和友招牌 · 简单极致',badge:'隐藏',desc:'就一碗光头粉，靠猪油、酱油、葱花三样撑场。粉吸饱油香，质朴的惊艳。',shop:'超级文和友',img:'zhuyou',time:'第6站 文和友'},
+  {name:'刮凉粉',sub:'夏日解暑 · 酸辣',badge:'解腻',desc:'绿豆粉刮成条，浇酱油醋辣油花生碎。冰凉酸辣，边走边吃最对味。',shop:'太平街流动摊',img:'liangfen',time:'第3站 太平街'},
+  {name:'老长沙大香肠',sub:'炸得外焦内嫩',badge:'街头',desc:'13元一根，炸得酥脆咬下去满嘴肉香，逛街必备。',shop:'文和友大香肠',img:'xiangchang',time:'第3站 太平街'}
+];
+document.getElementById('food-grid').innerHTML=foodData.map(f=>`
+  <div class="food-card"><div class="img-wrap relative"><img src="https://picsum.photos/seed/changsha-${f.img}/600/400.jpg" alt="${f.name}"><span class="badge">${f.badge}</span></div><div class="p-5"><h3 class="font-serif font-bold text-lg mb-1">${f.name}</h3><p class="text-xs text-[var(--muted)] mb-3">${f.sub}</p><p class="text-sm text-[var(--ink-soft)] leading-relaxed">${f.desc}</p><div class="mt-4 pt-4 border-t border-[var(--line)] flex justify-between text-xs"><span class="text-[var(--muted)]">${f.time}</span><span class="text-[var(--ink)] font-medium">${f.shop}</span></div></div></div>
+`).join('');
+
+function copyAddress(addr,btn){navigator.clipboard.writeText(addr).then(()=>{btn.classList.add('copied');btn.querySelector('span').textContent='已复制';btn.querySelector('i').className='fas fa-check';setTimeout(()=>{btn.classList.remove('copied');btn.querySelector('span').textContent='复制地址';btn.querySelector('i').className='far fa-copy'},2000)}).catch(()=>{const ta=document.createElement('textarea');ta.value=addr;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);btn.querySelector('span').textContent='已复制';setTimeout(()=>{btn.querySelector('span').textContent='复制地址'},2000)})}
+
+const map=L.map('map',{scrollWheelZoom:false,zoomControl:true}).setView([28.2005,112.9760],14);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap 贡献者',maxZoom:18,subdomains:['a','b','c']}).addTo(map);
+L.polyline(itinerary.map(p=>p.coords),{color:'#C8392E',weight:2,opacity:.55,dashArray:'6, 10',lineCap:'round'}).addTo(map);
+const markers={};
+itinerary.forEach(p=>{const icon=L.divIcon({className:'marker-wrapper',html:`<div class="marker-pin ${p.color}" data-id="${p.id}"><span>${p.id}</span></div>`,iconSize:[34,34],iconAnchor:[17,34],popupAnchor:[0,-34]});const marker=L.marker(p.coords,{icon}).addTo(map);marker.bindPopup(`<div style="min-width:220px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="background:${p.color==='red'?'#C8392E':'#E8A33D'};color:#fff;padding:2px 8px;border-radius:2px;font-size:11px;font-weight:600;">${p.type}</span><span style="font-size:11px;color:#8B7D6F;">${p.time} · ${p.duration}</span></div><div style="font-family:'Noto Serif SC',serif;font-weight:700;font-size:17px;color:#2A1F1A;margin-bottom:4px;">${p.name}</div><div style="font-size:11px;color:#8B7D6F;margin-bottom:8px;">${p.fullAddress}</div><div style="font-size:12px;color:#5A4A3F;line-height:1.65;border-top:1px solid #E5D7BE;padding-top:8px;">${p.desc.substring(0,90)}...</div></div>`,{maxWidth:280});marker.on('click',()=>highlightCard(p.id));markers[p.id]=marker});
+function focusOnMap(id){const p=itinerary.find(x=>x.id===id);if(!p)return;map.flyTo(p.coords,15,{duration:.8});setTimeout(()=>markers[id].openPopup(),600);highlightCard(id);document.getElementById('map-section').scrollIntoView({behavior:'smooth',block:'start'})}
+window.focusOnMap=focusOnMap;
+function highlightCard(id){document.querySelectorAll('.stop-card').forEach(c=>c.classList.toggle('active',+c.dataset.id===id));document.querySelectorAll('.map-list-item').forEach(c=>c.classList.toggle('active',+c.dataset.id===id));document.querySelectorAll('.marker-pin').forEach(m=>m.classList.toggle('active',+m.dataset.id===id))}
+window.highlightCard=highlightCard;
+const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.1});document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+const countIO=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const el=x.target,t=+el.dataset.count;let c=0;const s=Math.max(1,Math.floor(t/30));const ti=setInterval(()=>{c+=s;if(c>=t){c=t;clearInterval(ti)}el.textContent=c},40);countIO.unobserve(el)}})},{threshold:.5});document.querySelectorAll('[data-count]').forEach(el=>countIO.observe(el));
+const progIO=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const el=x.target;setTimeout(()=>el.style.width=el.dataset.width,200);progIO.unobserve(el)}})},{threshold:.5});document.querySelectorAll('.progress-fill').forEach(el=>progIO.observe(el));
+const nav=document.querySelector('nav.top-nav');window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>30));
+</script>
+</body>
+</html>
