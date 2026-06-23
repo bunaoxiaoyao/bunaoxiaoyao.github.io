@@ -1,914 +1,1013 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小妖的洞府</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+QingKe+HuangYou&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<meta charset="UTF-8">
+<title>长沙一日游 · 山水洲城烟火指南</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        display: ['ZCOOL QingKe HuangYou', 'cursive'],
-                        body: ['Noto Sans SC', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <style>
-        :root {
-            --bg: #070d0a;
-            --bg-light: #0d1a14;
-            --fg: #e2ebe5;
-            --fg-muted: #7a8f82;
-            --accent: #00ff88;
-            --accent2: #ff6b35;
-            --card: rgba(13, 26, 20, 0.75);
-            --border: rgba(0, 255, 136, 0.12);
-            --glow: rgba(0, 255, 136, 0.25);
-        }
+<style>
+  :root {
+    --bg: #FBF6EE;
+    --bg-warm: #F4E9D4;
+    --paper: #FFFCF5;
+    --ink: #2A1F1A;
+    --ink-soft: #5A4A3F;
+    --muted: #8B7D6F;
+    --line: #E5D7BE;
+    --red: #C8392E;
+    --red-deep: #9E2B22;
+    --green: #1F4D3A;
+    --gold: #E8A33D;
+    --shadow: 0 10px 40px -10px rgba(42, 31, 26, 0.18);
+  }
+  * { -webkit-font-smoothing: antialiased; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+  .font-serif { font-family: 'Noto Serif SC', serif; }
+  .font-brush { font-family: 'Ma Shan Zheng', cursive; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-        body {
-            font-family: 'Noto Sans SC', sans-serif;
-            background: var(--bg);
-            color: var(--fg);
-            overflow-x: hidden;
-        }
+  /* 纸纹背景 */
+  .paper-texture {
+    background-image:
+      radial-gradient(circle at 18% 22%, rgba(232, 163, 61, 0.10) 0%, transparent 45%),
+      radial-gradient(circle at 82% 70%, rgba(200, 57, 46, 0.07) 0%, transparent 45%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+  }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+  /* Hero 光晕 */
+  .hero-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.55;
+    pointer-events: none;
+    animation: float 16s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(40px,-30px) scale(1.1); }
+    66% { transform: translate(-30px,25px) scale(0.95); }
+  }
 
-        #particles-canvas {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
+  /* 滚动入场 */
+  .reveal { opacity:0; transform: translateY(34px); transition: opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1); }
+  .reveal.in { opacity:1; transform: translateY(0); }
 
-        #mouse-glow {
-            position: fixed;
-            width: 420px;
-            height: 420px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(0,255,136,0.07) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 1;
-            transform: translate(-50%, -50%);
-            transition: opacity 0.3s;
-            will-change: left, top;
-        }
+  /* 章节标签 */
+  .section-label { letter-spacing:.4em; text-transform:uppercase; font-size:11px; color:var(--muted); }
 
-        .gradient-text {
-            background: linear-gradient(135deg, #00ff88, #ff6b35, #00ff88);
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientShift 4s ease infinite;
-        }
-        @keyframes gradientShift {
-            0%   { background-position: 0% 50%; }
-            50%  { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+  /* 印章 */
+  .stamp {
+    display:inline-block; padding:6px 14px;
+    border:2px solid var(--red); color:var(--red);
+    font-family:'Noto Serif SC',serif; font-weight:700;
+    transform:rotate(-3deg);
+    background:rgba(200,57,46,0.05);
+  }
 
-        .nav-scrolled {
-            background: rgba(7, 13, 10, 0.88) !important;
-            backdrop-filter: blur(20px) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
-            border-bottom: 1px solid var(--border) !important;
-        }
+  /* Hero 大标题 */
+  .hero-title {
+    font-family:'Noto Serif SC',serif; font-weight:900;
+    line-height:.92; letter-spacing:-0.02em;
+  }
 
-        .nav-link {
-            position: relative;
-            color: var(--fg-muted);
-            transition: color 0.3s ease;
-        }
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--accent);
-            transition: width 0.3s ease;
-        }
-        .nav-link:hover { color: var(--accent); }
-        .nav-link:hover::after { width: 100%; }
+  /* 顶栏 */
+  nav.top-nav {
+    backdrop-filter: blur(12px);
+    background: rgba(251, 246, 238, 0.85);
+    border-bottom: 1px solid var(--line);
+  }
 
-        .glow-blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(90px);
-            opacity: 0.35;
-            pointer-events: none;
-            animation: blobFloat 10s ease-in-out infinite;
-        }
-        @keyframes blobFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33%  { transform: translate(30px, -25px) scale(1.1); }
-            66%  { transform: translate(-25px, 20px) scale(0.9); }
-        }
+  /* 时间线轴 */
+  .timeline-spine {
+    position:absolute; left: 78px; top: 12px; bottom: 12px; width: 2px;
+    background: linear-gradient(to bottom, transparent, var(--line) 6%, var(--line) 94%, transparent);
+  }
+  @media (max-width: 768px) {
+    .timeline-spine { left: 28px; }
+  }
 
-        .typing-cursor {
-            display: inline-block;
-            width: 2px;
-            height: 1.2em;
-            background: var(--accent);
-            margin-left: 2px;
-            animation: blink 1s step-end infinite;
-            vertical-align: text-bottom;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50%      { opacity: 0; }
-        }
+  /* 时间线节点 */
+  .timeline-dot {
+    width: 14px; height: 14px; border-radius:50%;
+    background: var(--paper); border: 3px solid var(--red);
+    box-shadow: 0 0 0 4px var(--bg);
+    transition: all .35s cubic-bezier(.2,.8,.2,1);
+    z-index: 2; position: relative;
+  }
+  .itinerary-card:hover .timeline-dot { transform: scale(1.4); background: var(--red); }
+  .itinerary-card.active .timeline-dot {
+    transform: scale(1.5);
+    background: var(--gold); border-color: var(--gold);
+    box-shadow: 0 0 0 4px var(--bg), 0 0 0 8px rgba(232,163,61,0.25);
+  }
 
-        .scroll-hint { animation: bounceDown 2s ease-in-out infinite; }
-        @keyframes bounceDown {
-            0%, 100% { transform: translateY(0); }
-            50%      { transform: translateY(10px); }
-        }
+  /* 行程卡 */
+  .itinerary-card {
+    position: relative;
+    transition: all .4s cubic-bezier(.2,.8,.2,1);
+  }
+  .itinerary-card .card-body {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    transition: all .4s cubic-bezier(.2,.8,.2,1);
+  }
+  .itinerary-card:hover .card-body {
+    transform: translateX(4px);
+    box-shadow: var(--shadow);
+    border-color: rgba(200,57,46,0.4);
+  }
+  .itinerary-card.active .card-body {
+    border-color: var(--red);
+    box-shadow: 0 12px 36px -8px rgba(200,57,46,0.25);
+    background: linear-gradient(135deg, rgba(200,57,46,0.03), var(--paper) 40%);
+  }
 
-        .reveal {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
-        }
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+  /* 编号大字 */
+  .step-num {
+    font-family:'Noto Serif SC',serif; font-weight:900;
+    font-size: 72px; line-height:1;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--red);
+    opacity: 0.6;
+    transition: all .4s;
+  }
+  .itinerary-card.active .step-num {
+    -webkit-text-stroke: 1.5px var(--red);
+    color: var(--red);
+    opacity: 1;
+  }
 
-        .tilt-card {
-            transition: box-shadow 0.3s ease;
-            transform-style: preserve-3d;
-            will-change: transform;
-        }
-        .tilt-card:hover {
-            box-shadow: 0 20px 60px rgba(0, 255, 136, 0.08), 0 0 40px rgba(0, 255, 136, 0.04);
-        }
-        .article-cover { transition: transform 0.5s ease; }
-        .tilt-card:hover .article-cover { transform: scale(1.08); }
+  /* 类型标签 */
+  .type-tag {
+    display:inline-flex; align-items:center; gap:5px;
+    padding: 3px 10px; font-size: 11px;
+    border-radius: 2px; font-weight:500;
+  }
+  .type-tag.景点 { background: rgba(31,77,58,0.1); color: var(--green); }
+  .type-tag.美食 { background: rgba(200,57,46,0.1); color: var(--red); }
+  .type-tag.文化 { background: rgba(232,163,61,0.15); color: #9E6B14; }
+  .type-tag.打卡 { background: rgba(200,57,46,0.1); color: var(--red); }
+  .type-tag.逛街 { background: rgba(232,163,61,0.15); color: #9E6B14; }
+  .type-tag.晚餐 { background: rgba(200,57,46,0.1); color: var(--red); }
+  .type-tag.夜景 { background: rgba(31,77,58,0.1); color: var(--green); }
 
-        .tag {
-            display: inline-block;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            border: 1px solid var(--border);
-            color: var(--accent);
-            background: rgba(0, 255, 136, 0.05);
-        }
-        .tag-dotnet {
-            color: #512bd4;
-            border-color: rgba(81, 43, 212, 0.3);
-            background: rgba(81, 43, 212, 0.08);
-        }
+  /* 美食小标签 */
+  .food-tag {
+    display:inline-block; padding: 3px 9px;
+    background: var(--bg-warm); border: 1px solid var(--line);
+    color: var(--ink-soft); font-size: 11px;
+    border-radius: 2px;
+  }
 
-        .skill-bar {
-            height: 6px;
-            background: rgba(0, 255, 136, 0.08);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        .skill-bar-fill {
-            height: 100%;
-            border-radius: 3px;
-            background: linear-gradient(90deg, #00ff88, #00cc6a);
-            width: 0;
-            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+  /* 提示 bullet */
+  .tip-li {
+    position: relative; padding-left: 14px;
+    color: var(--ink-soft); font-size: 13px;
+  }
+  .tip-li::before {
+    content: ''; position: absolute; left: 0; top: 9px;
+    width: 5px; height: 5px; background: var(--gold);
+    border-radius: 50%;
+  }
 
-        .stat-number {
-            font-family: 'ZCOOL QingKe HuangYou', cursive;
-            font-size: 2.5rem;
-            color: var(--accent);
-            line-height: 1;
-        }
+  /* 地图 */
+  #map {
+    height: 620px; border-radius: 6px;
+    border: 1px solid var(--line);
+    filter: sepia(0.18) saturate(0.92) contrast(0.98);
+  }
+  .leaflet-container { background: #F4E9D4; font-family: 'Noto Sans SC', sans-serif; }
+  .leaflet-popup-content-wrapper {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+  }
+  .leaflet-popup-content { margin: 14px 16px; font-family: 'Noto Sans SC', sans-serif; }
+  .leaflet-popup-tip { background: var(--paper); border: 1px solid var(--line); }
+  .leaflet-control-zoom a {
+    background: var(--paper) !important;
+    color: var(--ink) !important;
+    border-color: var(--line) !important;
+  }
+  .leaflet-control-zoom a:hover { background: var(--bg-warm) !important; }
+  .leaflet-control-attribution {
+    background: rgba(251,246,238,0.8) !important;
+    color: var(--muted) !important;
+    font-size: 10px !important;
+  }
 
-        .avatar-ring { position: relative; display: inline-block; }
-        .avatar-ring::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
-            background: conic-gradient(var(--accent), var(--accent2), #512bd4, var(--accent));
-            animation: spin 6s linear infinite;
-            z-index: 0;
-        }
-        .avatar-ring img { position: relative; z-index: 1; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+  /* 自定义 marker */
+  .marker-pin {
+    width: 34px; height: 34px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex; align-items: center; justify-content: center;
+    border: 2.5px solid #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    transition: transform .3s;
+  }
+  .marker-pin span {
+    transform: rotate(45deg);
+    color: #fff; font-weight: 700; font-size: 14px;
+    font-family: 'Noto Serif SC', serif;
+  }
+  .marker-pin.red    { background: var(--red); }
+  .marker-pin.green  { background: var(--green); }
+  .marker-pin.gold   { background: var(--gold); }
+  .marker-pin.active { transform: rotate(-45deg) scale(1.25); }
+  .marker-pin.active::after {
+    content: ''; position: absolute;
+    inset: -8px; border-radius: 50%;
+    border: 2px solid currentColor;
+    animation: pulse 1.5s ease-out infinite;
+    opacity: 0.6;
+  }
+  .marker-pin.red.active   { color: var(--red); }
+  .marker-pin.green.active { color: var(--green); }
+  .marker-pin.gold.active  { color: var(--gold); }
+  @keyframes pulse {
+    0% { transform: scale(0.8); opacity: 0.6; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
 
-        .timeline-line-v {
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: linear-gradient(to bottom, transparent, var(--accent), transparent);
-            transform: translateX(-50%);
-        }
-        .timeline-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: var(--accent);
-            border: 3px solid var(--bg);
-            box-shadow: 0 0 18px var(--glow);
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2;
-        }
+  /* 进度条 */
+  .progress-bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--red), var(--gold));
+    border-radius: 3px;
+    transition: width 1.5s cubic-bezier(.2,.8,.2,1);
+  }
 
-        .section-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--border), var(--accent), var(--border), transparent);
-            margin: 0 auto;
-            max-width: 600px;
-        }
+  /* 美食卡 */
+  .food-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: all .4s cubic-bezier(.2,.8,.2,1);
+  }
+  .food-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow);
+    border-color: var(--red);
+  }
+  .food-card .img-wrap {
+    height: 180px; overflow: hidden; position: relative;
+    background: var(--bg-warm);
+  }
+  .food-card img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .8s cubic-bezier(.2,.8,.2,1);
+    filter: sepia(0.12) saturate(1.1);
+  }
+  .food-card:hover img { transform: scale(1.08); }
+  .food-card .badge {
+    position: absolute; top: 12px; left: 12px;
+    background: var(--red); color: #fff;
+    font-family: 'Noto Serif SC', serif; font-weight: 700;
+    padding: 4px 10px; font-size: 12px;
+    border-radius: 2px;
+  }
 
-        .social-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--fg-muted);
-            transition: all 0.3s ease;
-        }
-        .social-icon:hover {
-            color: var(--accent);
-            border-color: var(--accent);
-            background: rgba(0, 255, 136, 0.1);
-            box-shadow: 0 0 20px var(--glow);
-            transform: translateY(-3px);
-        }
+  /* 贴士卡 */
+  .tip-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 28px;
+    transition: all .4s;
+    position: relative; overflow: hidden;
+  }
+  .tip-card:hover {
+    border-color: var(--red);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+  }
+  .tip-card .icon-wrap {
+    width: 48px; height: 48px;
+    background: var(--bg-warm);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--red); font-size: 20px;
+    margin-bottom: 16px;
+    transition: all .4s;
+  }
+  .tip-card:hover .icon-wrap {
+    background: var(--red); color: #fff;
+  }
 
-        #back-to-top {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: rgba(0, 255, 136, 0.12);
-            border: 1px solid var(--border);
-            color: var(--accent);
-            cursor: pointer;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        #back-to-top.visible { opacity: 1; transform: translateY(0); }
-        #back-to-top:hover {
-            background: rgba(0, 255, 136, 0.25);
-            box-shadow: 0 0 20px var(--glow);
-        }
+  /* 滚动条 */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
-        .read-more-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            color: var(--accent);
-            border: 1px solid var(--border);
-            padding: 6px 16px;
-            border-radius: 20px;
-            background: transparent;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .read-more-btn:hover {
-            background: rgba(0, 255, 136, 0.1);
-            border-color: var(--accent);
-            box-shadow: 0 0 15px var(--glow);
-        }
+  /* 漂浮装饰 */
+  .float-deco { animation: floatY 7s ease-in-out infinite; }
+  @keyframes floatY {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-12px) rotate(2deg); }
+  }
 
-        .toast-msg {
-            position: fixed;
-            bottom: 90px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-family: 'Noto Sans SC', sans-serif;
-            font-size: 14px;
-            z-index: 200;
-            background: rgba(0, 255, 136, 0.12);
-            border: 1px solid rgba(0, 255, 136, 0.25);
-            color: #00ff88;
-            backdrop-filter: blur(12px);
-            animation: toastIn 0.4s ease;
-        }
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
+  /* 选中标记 */
+  .pin-btn {
+    cursor: pointer;
+    transition: all .3s;
+  }
+  .pin-btn:hover { color: var(--red); }
 
-        .tech-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            background: rgba(0, 255, 136, 0.06);
-            border: 1px solid var(--border);
-            color: var(--fg-muted);
-            transition: all 0.3s ease;
-        }
-        .tech-badge:hover {
-            color: var(--accent);
-            border-color: var(--accent);
-            background: rgba(0, 255, 136, 0.1);
-        }
-        .tech-badge-dotnet {
-            background: rgba(81, 43, 212, 0.08);
-            border-color: rgba(81, 43, 212, 0.2);
-        }
-        .tech-badge-dotnet:hover {
-            color: #512bd4;
-            border-color: #512bd4;
-            background: rgba(81, 43, 212, 0.15);
-        }
+  /* 顶部隐藏滚动后显示阴影 */
+  nav.scrolled { box-shadow: 0 4px 24px -8px rgba(42,31,26,0.12); }
 
-        @media (max-width: 768px) {
-            .timeline-line-v  { left: 20px; }
-            .timeline-dot     { left: 20px; }
-            .stat-number      { font-size: 2rem; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-    </style>
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
+  }
+</style>
 </head>
+<body class="paper-texture">
 
-<body>
-    <canvas id="particles-canvas" aria-hidden="true"></canvas>
-    <div id="mouse-glow" aria-hidden="true"></div>
+<!-- 顶部导航 -->
+<nav class="top-nav fixed top-0 left-0 right-0 z-50 transition-shadow">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-[var(--red)] text-white flex items-center justify-center font-serif font-bold text-lg rounded-sm">长</div>
+      <div>
+        <div class="font-serif font-bold text-base leading-tight">长沙一日游</div>
+        <div class="text-[10px] tracking-widest text-[var(--muted)]">CHANGSHA 1-DAY GUIDE</div>
+      </div>
+    </div>
+    <div class="hidden md:flex items-center gap-8 text-sm">
+      <a href="#itinerary" class="hover:text-[var(--red)] transition">行程</a>
+      <a href="#map-section" class="hover:text-[var(--red)] transition">地图</a>
+      <a href="#food" class="hover:text-[var(--red)] transition">美食</a>
+      <a href="#tips" class="hover:text-[var(--red)] transition">贴士</a>
+    </div>
+    <div class="text-xs text-[var(--muted)] hidden sm:flex items-center gap-2">
+      <i class="far fa-clock"></i>
+      <span>全天 · 8 个站点</span>
+    </div>
+  </div>
+</nav>
 
-    <!-- 导航栏 -->
-    <nav id="navbar" class="fixed top-0 left-0 w-full z-50 transition-all duration-500" style="background:transparent;" role="navigation" aria-label="主导航">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="#home" class="font-display text-2xl" style="color:var(--accent);">小妖洞府</a>
-            <div class="hidden md:flex items-center gap-8">
-                <a href="#home"     class="nav-link font-body text-sm">首页</a>
-                <a href="#about"    class="nav-link font-body text-sm">关于</a>
-                <a href="#articles" class="nav-link font-body text-sm">文章</a>
-                <a href="#skills"   class="nav-link font-body text-sm">技能</a>
-                <a href="#timeline" class="nav-link font-body text-sm">足迹</a>
+<!-- HERO -->
+<section class="relative pt-32 pb-20 overflow-hidden">
+  <div class="hero-glow" style="width:560px;height:560px;background:var(--red);top:-140px;left:-120px;"></div>
+  <div class="hero-glow" style="width:420px;height:420px;background:var(--gold);top:160px;right:-100px;animation-delay:-5s;"></div>
+  <div class="hero-glow" style="width:300px;height:300px;background:var(--green);bottom:-100px;left:30%;animation-delay:-9s;opacity:0.35;"></div>
+
+  <div class="max-w-7xl mx-auto px-6 relative">
+    <div class="grid lg:grid-cols-12 gap-10 items-end">
+      <div class="lg:col-span-8">
+        <div class="flex items-center gap-4 mb-8 reveal">
+          <span class="stamp">星城长沙</span>
+          <span class="section-label">A Day in Changsha</span>
+          <span class="text-[var(--muted)] text-xs">·  No.001</span>
+        </div>
+        <h1 class="hero-title text-[72px] md:text-[128px] reveal">
+          山水洲城<br>
+          <span class="text-[var(--red)]">烟火</span><span class="font-brush text-[var(--gold)] text-[60px] md:text-[100px] ml-2">一日</span>
+        </h1>
+        <p class="mt-8 text-lg text-[var(--ink-soft)] max-w-2xl leading-relaxed reveal">
+          从橘子洲的晨雾，到岳麓山的古樟；从太平街的臭豆腐，到湘江畔的灯火。<br>
+          这是一座用味觉和脚步同时阅读的城 —— 一天，刚好够你爱上它。
+        </p>
+        <div class="mt-10 flex flex-wrap gap-4 reveal">
+          <a href="#itinerary" class="inline-flex items-center gap-2 bg-[var(--red)] text-white px-7 py-3.5 rounded-sm font-medium hover:bg-[var(--red-deep)] transition group">
+            查看完整行程 <i class="fas fa-arrow-right group-hover:translate-x-1 transition"></i>
+          </a>
+          <a href="#map-section" class="inline-flex items-center gap-2 border-2 border-[var(--ink)] text-[var(--ink)] px-7 py-3.5 rounded-sm font-medium hover:bg-[var(--ink)] hover:text-[var(--bg)] transition">
+            <i class="far fa-map"></i> 浏览地图
+          </a>
+        </div>
+      </div>
+
+      <div class="lg:col-span-4 reveal">
+        <div class="bg-[var(--paper)] border border-[var(--line)] p-6 rounded-sm shadow-sm">
+          <div class="flex justify-between items-center pb-4 border-b border-[var(--line)]">
+            <span class="section-label">行程总览</span>
+            <i class="fas fa-route text-[var(--red)]"></i>
+          </div>
+          <div class="grid grid-cols-3 gap-4 text-center py-5">
+            <div>
+              <div class="font-serif font-black text-3xl text-[var(--red)]" data-count="8">0</div>
+              <div class="text-xs text-[var(--muted)] mt-1">站点</div>
             </div>
-            <button id="mobile-menu-btn" class="md:hidden text-xl" style="color:var(--fg);" aria-label="打开菜单">
-                <i class="fas fa-bars"></i>
+            <div>
+              <div class="font-serif font-black text-3xl text-[var(--green)]"><span data-count="15">0</span>h</div>
+              <div class="text-xs text-[var(--muted)] mt-1">时长</div>
+            </div>
+            <div>
+              <div class="font-serif font-black text-3xl text-[var(--gold)]">~30</div>
+              <div class="text-xs text-[var(--muted)] mt-1">公里</div>
+            </div>
+          </div>
+          <div class="pt-4 border-t border-[var(--line)]">
+            <div class="flex justify-between text-xs text-[var(--muted)] mb-2">
+              <span>行程节奏</span>
+              <span>紧凑舒适</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:0%" data-width="72%"></div></div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-[var(--line)] flex justify-between items-center text-xs text-[var(--muted)]">
+            <span>建议预算</span>
+            <span class="text-[var(--ink)] font-medium">¥350 - 600 / 人</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 行程时间线 -->
+<section id="itinerary" class="py-20 relative">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-16 gap-6 reveal">
+      <div>
+        <div class="section-label mb-3">01 — 行程安排</div>
+        <h2 class="font-serif font-black text-5xl md:text-6xl">从清晨到夜色</h2>
+      </div>
+      <div class="text-sm text-[var(--muted)] max-w-xs md:text-right leading-relaxed">
+        时间为建议参考，可根据体力与兴趣灵活调整。<br>点击任意站点可在地图定位。
+      </div>
+    </div>
+
+    <div class="relative" id="itinerary-list">
+      <div class="timeline-spine"></div>
+      <!-- 行程项由 JS 渲染 -->
+    </div>
+  </div>
+</section>
+
+<!-- 地图 -->
+<section id="map-section" class="py-20 bg-[var(--bg-warm)] relative">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12 gap-6 reveal">
+      <div>
+        <div class="section-label mb-3">02 — 行程地图</div>
+        <h2 class="font-serif font-black text-5xl md:text-6xl">八点一线<span class="text-[var(--red)]">.</span></h2>
+      </div>
+      <div class="text-sm text-[var(--muted)] max-w-sm leading-relaxed">
+        点击地图标点查看景点详情，点击右侧列表可在地图上定位。虚线为推荐行进路线。
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-12 gap-6 reveal">
+      <div class="lg:col-span-8">
+        <div id="map" class="shadow-sm"></div>
+        <div class="mt-4 flex flex-wrap gap-4 text-xs text-[var(--ink-soft)]">
+          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[var(--red)]"></span>美食 / 打卡</span>
+          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[var(--green)]"></span>景点 / 文化</span>
+          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[var(--gold)]"></span>逛街 / 夜景</span>
+          <span class="flex items-center gap-2 ml-auto text-[var(--muted)]"><i class="fas fa-mouse-pointer"></i>滚轮缩放已禁用，使用控件</span>
+        </div>
+      </div>
+      <div class="lg:col-span-4">
+        <div class="bg-[var(--paper)] border border-[var(--line)] rounded-sm p-5 h-full">
+          <div class="flex items-center justify-between pb-3 border-b border-[var(--line)] mb-4">
+            <span class="section-label">站点速查</span>
+            <i class="fas fa-list-ol text-[var(--red)]"></i>
+          </div>
+          <div class="space-y-1.5 max-h-[560px] overflow-y-auto pr-1" id="map-list">
+            <!-- JS 渲染 -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 美食推荐 -->
+<section id="food" class="py-20 relative">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12 gap-6 reveal">
+      <div>
+        <div class="section-label mb-3">03 — 必尝美食</div>
+        <h2 class="font-serif font-black text-5xl md:text-6xl">辣是<span class="text-[var(--red)]">态度</span></h2>
+      </div>
+      <div class="text-sm text-[var(--muted)] max-w-sm leading-relaxed">
+        长沙菜属湘菜系，重油重色、酸辣鲜香。一日游可挑代表性的尝，不必全吃 —— 留点念想。
+      </div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal">
+      <div class="food-card">
+        <div class="img-wrap">
+          <img src="https://picsum.photos/seed/changsha-stinky/600/400.jpg" alt="臭豆腐">
+          <span class="badge">招牌</span>
+        </div>
+        <div class="p-5">
+          <h3 class="font-serif font-bold text-lg mb-1">臭豆腐</h3>
+          <p class="text-xs text-[var(--muted)] mb-3">黑色经典 · 外焦内嫩</p>
+          <p class="text-sm text-[var(--ink-soft)] leading-relaxed">长沙名片级小吃，黑如墨、香似乳。浇上蒜汁辣椒萝卜干，一口爆汁。</p>
+          <div class="mt-4 pt-4 border-t border-[var(--line)] flex justify-between text-xs">
+            <span class="text-[var(--muted)]">推荐</span>
+            <span class="text-[var(--ink)] font-medium">黑色经典 / 罗家</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="food-card">
+        <div class="img-wrap">
+          <img src="https://picsum.photos/seed/changsha-crayfish/600/400.jpg" alt="口味虾">
+          <span class="badge">必点</span>
+        </div>
+        <div class="p-5">
+          <h3 class="font-serif font-bold text-lg mb-1">口味虾</h3>
+          <p class="text-xs text-[var(--muted)] mb-3">麻辣鲜香 · 夜宵之王</p>
+          <p class="text-sm text-[var(--ink-soft)] leading-relaxed">长沙夜宵的灵魂。红亮油润，麻、辣、鲜、香四味齐发，配啤酒刚好。</p>
+          <div class="mt-4 pt-4 border-t border-[var(--line)] flex justify-between text-xs">
+            <span class="text-[var(--muted)]">推荐</span>
+            <span class="text-[var(--ink)] font-medium">文和友 / 墨子</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="food-card">
+        <div class="img-wrap">
+          <img src="https://picsum.photos/seed/changsha-tea/600/400.jpg" alt="茶颜悦色">
+          <span class="badge">国民</span>
+        </div>
+        <div class="p-5">
+          <h3 class="font-serif font-bold text-lg mb-1">茶颜悦色</h3>
+          <p class="text-xs text-[var(--muted)] mb-3">中式鲜茶 · 长沙限定</p>
+          <p class="text-sm text-[var(--ink-soft)] leading-relaxed">只在长沙才能喝到的"幽兰拿铁"。奶香茶醇，顶上一抹碧根果碎。</p>
+          <div class="mt-4 pt-4 border-t border-[var(--line)] flex justify-between text-xs">
+            <span class="text-[var(--muted)]">必点</span>
+            <span class="text-[var(--ink)] font-medium">幽兰拿铁 / 声声乌龙</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="food-card">
+        <div class="img-wrap">
+          <img src="https://picsum.photos/seed/changsha-noodle/600/400.jpg" alt="米粉">
+          <span class="badge">早餐</span>
+        </div>
+        <div class="p-5">
+          <h3 class="font-serif font-bold text-lg mb-1">长沙米粉</h3>
+          <p class="text-xs text-[var(--muted)] mb-3">扁粉 · 煨码子</p>
+          <p class="text-sm text-[var(--ink-soft)] leading-relaxed">长沙人早上的仪式感。扁粉滑嫩，汤头是骨头熬的高汤，加煨码子才正宗。</p>
+          <div class="mt-4 pt-4 border-t border-[var(--line)] flex justify-between text-xs">
+            <span class="text-[var(--muted)]">推荐</span>
+            <span class="text-[var(--ink)] font-medium">公交新村 / 肆姐</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="food-card">
+        <div class="img-wrap">
+          <img src="https://picsum.photos/seed/changsha-tangyou/600/400.jpg" alt="糖油粑粑">
+        </div>
+        <div class="p-5">
+          <h3 class="font-serif font-bold text-lg mb-1">糖油粑粑</h3>
+          <p class="text-xs text-[var(--muted)] mb-3">甜糯 · 街头小食</p>
+          <p class="text-sm text-[var(--ink-soft)] leading-relaxed">糯米粉团炸到金黄，再裹一层糖稀。外脆内糯，趁热吃才不粘牙。</p>
+          <div class="mt-4 pt-4 border-t border-[var(--line)] flex justify-between text-xs">
+            <span class="text-[var(--muted)]">推荐</span>
+            <span class="text-[var(--ink)] font-medium">金记 / 李公庙</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="food-card">
+        <div class="img-wrap">
+          <img src="https://picsum.photos/seed/changsha-duojiao/600/400.jpg" alt="剁椒鱼头">
+          <span class="badge">硬菜</span>
+        </div>
+        <div class="p-5">
+          <h3 class="font-serif font-bold text-lg mb-1">剁椒鱼头</h3>
+          <p class="text-xs text-[var(--muted)] mb-3">湘菜代表 · 鲜辣</p>
+          <p class="text-sm text-[var(--ink-soft)] leading-relaxed">鳙鱼头铺满红剁椒蒸制，鲜辣入骨。最后下一份面条拌汤汁是经典吃法。</p>
+          <div class="mt-4 pt-4 border-t border-[var(--line)] flex justify-between text-xs">
+            <span class="text-[var(--muted)]">推荐</span>
+            <span class="text-[var(--ink)] font-medium">坛宗 / 俊子饭店</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="food-card">
+        <div class="img-wrap">
+          <img src="https://picsum.photos/seed/changsha-gualiangfen/600/400.jpg" alt="刮凉粉">
+        </div>
+        <div class="p-5">
+          <h3 class="font-serif font-bold text-lg mb-1">刮凉粉</h3>
+          <p class="text-xs text-[var(--muted)] mb-3">夏日解暑 · 酸辣</p>
+          <p class="text-sm text-[var(--ink-soft)] leading-relaxed">绿豆粉刮成条，浇酱油醋辣油花生碎。冰凉酸辣，太平街边走边吃最对味。</p>
+          <div class="mt-4 pt-4 border-t border-[var(--line)] flex justify-between text-xs">
+            <span class="text-[var(--muted)]">推荐</span>
+            <span class="text-[var(--ink)] font-medium">太平街流动摊</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="food-card">
+        <div class="img-wrap">
+          <img src="https://picsum.photos/seed/changsha-zhuyou/600/400.jpg" alt="猪油拌粉">
+        </div>
+        <div class="p-5">
+          <h3 class="font-serif font-bold text-lg mb-1">猪油拌粉</h3>
+          <p class="text-xs text-[var(--muted)] mb-3">文和友招牌 · 简单到极致</p>
+          <p class="text-sm text-[var(--ink-soft)] leading-relaxed">就一碗光头粉，靠猪油、酱油、葱花三样撑场。粉吸饱油香，是质朴的惊艳。</p>
+          <div class="mt-4 pt-4 border-t border-[var(--line)] flex justify-between text-xs">
+            <span class="text-[var(--muted)]">推荐</span>
+            <span class="text-[var(--ink)] font-medium">超级文和友</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 实用贴士 -->
+<section id="tips" class="py-20 bg-[var(--bg-warm)]">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12 gap-6 reveal">
+      <div>
+        <div class="section-label mb-3">04 — 实用贴士</div>
+        <h2 class="font-serif font-black text-5xl md:text-6xl">少踩坑，多享受</h2>
+      </div>
+      <div class="text-sm text-[var(--muted)] max-w-sm leading-relaxed">
+        出行前看一眼，能少走不少弯路。尤其博物院预约和文和友取号，是两个最容易翻车的点。
+      </div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal">
+      <div class="tip-card">
+        <div class="icon-wrap"><i class="fas fa-train"></i></div>
+        <h3 class="font-serif font-bold text-lg mb-2">交通</h3>
+        <p class="text-sm text-[var(--ink-soft)] leading-relaxed mb-4">高铁首选长沙南站，地铁 2/4 号线串联大部分景点。市内打车便宜，但晚高峰堵车严重。</p>
+        <ul class="space-y-1.5">
+          <li class="tip-li">地铁刷码进站，无需买票</li>
+          <li class="tip-li">共享单车江边骑行极佳</li>
+          <li class="tip-li">机场磁悬浮到南站 19 分钟</li>
+        </ul>
+      </div>
+
+      <div class="tip-card">
+        <div class="icon-wrap"><i class="fas fa-cloud-sun"></i></div>
+        <h3 class="font-serif font-bold text-lg mb-2">季节</h3>
+        <p class="text-sm text-[var(--ink-soft)] leading-relaxed mb-4">长沙夏酷热、冬阴冷，最佳是 3-5 月和 9-11 月。夏天务必带伞，防晒兼防骤雨。</p>
+        <ul class="space-y-1.5">
+          <li class="tip-li">夏季 35℃+ 是常态</li>
+          <li class="tip-li">冬天湿冷，比北方更难熬</li>
+          <li class="tip-li">4 月易有大雨，关注天气</li>
+        </ul>
+      </div>
+
+      <div class="tip-card">
+        <div class="icon-wrap"><i class="fas fa-ticket-alt"></i></div>
+        <h3 class="font-serif font-bold text-lg mb-2">预约</h3>
+        <p class="text-sm text-[var(--ink-soft)] leading-relaxed mb-4">湖南博物院和橘子洲必须提前预约，尤其博物院是出名的"约不到"。建议出行前 7 天动手。</p>
+        <ul class="space-y-1.5">
+          <li class="tip-li">博物院微信公号预约</li>
+          <li class="tip-li">橘子洲小火车现场购票</li>
+          <li class="tip-li">岳麓书院可现场买票</li>
+        </ul>
+      </div>
+
+      <div class="tip-card">
+        <div class="icon-wrap"><i class="fas fa-exclamation-triangle"></i></div>
+        <h3 class="font-serif font-bold text-lg mb-2">避坑</h3>
+        <p class="text-sm text-[var(--ink-soft)] leading-relaxed mb-4">文和友周末等位 2 小时起，下午 5 点前到或线上取号。太平街的"老店"参差不齐，认准招牌。</p>
+        <ul class="space-y-1.5">
+          <li class="tip-li">不要在景区买特产带回家</li>
+          <li class="tip-li">口味虾别点"特辣"除非有底</li>
+          <li class="tip-li">江边拉客的三轮 politely 拒绝</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-10 grid md:grid-cols-3 gap-5 reveal">
+      <div class="bg-[var(--paper)] border border-[var(--line)] rounded-sm p-6 flex items-center gap-5">
+        <div class="font-serif font-black text-4xl text-[var(--red)]">¥</div>
+        <div>
+          <div class="text-xs text-[var(--muted)] mb-1">人均预算参考</div>
+          <div class="font-serif font-bold text-lg">350 - 600 元</div>
+          <div class="text-xs text-[var(--ink-soft)] mt-1">含餐饮+门票+市内交通</div>
+        </div>
+      </div>
+      <div class="bg-[var(--paper)] border border-[var(--line)] rounded-sm p-6 flex items-center gap-5">
+        <div class="font-serif font-black text-4xl text-[var(--green)]"><i class="fas fa-shoe-prints"></i></div>
+        <div>
+          <div class="text-xs text-[var(--muted)] mb-1">步行距离</div>
+          <div class="font-serif font-bold text-lg">约 12 公里</div>
+          <div class="text-xs text-[var(--ink-soft)] mt-1">穿舒适的运动鞋</div>
+        </div>
+      </div>
+      <div class="bg-[var(--paper)] border border-[var(--line)] rounded-sm p-6 flex items-center gap-5">
+        <div class="font-serif font-black text-4xl text-[var(--gold)]"><i class="fas fa-mobile-alt"></i></div>
+        <div>
+          <div class="text-xs text-[var(--muted)] mb-1">必备 APP</div>
+          <div class="font-serif font-bold text-lg">微信 / 高德 / 美团</div>
+          <div class="text-xs text-[var(--ink-soft)] mt-1">预约、导航、取号全靠它们</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="py-12 border-t border-[var(--line)]">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 bg-[var(--red)] text-white flex items-center justify-center font-serif font-bold rounded-sm">长</div>
+          <span class="font-serif font-bold">长沙一日游 · 山水洲城烟火指南</span>
+        </div>
+        <p class="text-xs text-[var(--muted)] max-w-md leading-relaxed">
+          一份为一天停留的旅人准备的轻盈路书。<br>
+          愿你在辣味与江风里，遇见属于你的那一面长沙。
+        </p>
+      </div>
+      <div class="text-right">
+        <div class="font-brush text-2xl text-[var(--red)]">吃得苦 · 霸得蛮 · 耐得烦</div>
+        <div class="text-xs text-[var(--muted)] mt-2 tracking-widest">CHANGSHA · 2025</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // ========= 行程数据 =========
+  const itinerary = [
+    {
+      id: 1, time: '08:00', duration: '2 小时',
+      name: '橘子洲头', subtitle: '青年毛泽东艺术雕塑',
+      type: '景点', color: 'green', icon: 'fa-flag',
+      coords: [28.2006, 112.9394],
+      desc: '湘江中流的扇形绿洲，长沙的精神地标。清晨的橘洲薄雾蒙蒙，沿江边步道一路向北，尽头是 32 米高的青年毛泽东雕塑。建议坐小火车代步，把体力留给后面的山。',
+      tips: ['小火车 40 元/人往返', '免门票但需预约', '早上人少，光线好']
+    },
+    {
+      id: 2, time: '10:30', duration: '2 小时',
+      name: '岳麓山 · 岳麓书院', subtitle: '千年学府 · 爱晚亭',
+      type: '景点', color: 'green', icon: 'fa-mountain',
+      coords: [28.1872, 112.9417],
+      desc: '南岳七十二峰之首，书院创建于北宋开宝九年（976）。"惟楚有材，于斯为盛"—— 这扇门后是湖湘文化的源头。沿山径而上访爱晚亭，俯瞰长沙城。',
+      tips: ['书院门票 50 元', '建议南门进北门出', '索道 30 元可上下']
+    },
+    {
+      id: 3, time: '12:30', duration: '1.5 小时',
+      name: '太平老街', subtitle: '贾谊故居 · 老长沙味道',
+      type: '美食', color: 'red', icon: 'fa-utensils',
+      coords: [28.1967, 112.9737],
+      desc: '2100 年历史的老街，青石板、木质门面、晒着太阳的猫。这里是长沙小吃的总集 —— 臭豆腐、糖油粑粑、刮凉粉、口味虾，一站吃遍。贾谊故居藏在街中，免费参观。',
+      tips: ['避开 13-14 点饭点高峰', '现金和手机支付都行', '别在第一家买，往里走走']
+    },
+    {
+      id: 4, time: '14:30', duration: '2 小时',
+      name: '湖南博物院', subtitle: '辛追夫人 · 马王堆汉墓',
+      type: '文化', color: 'gold', icon: 'fa-landmark',
+      coords: [28.2153, 112.9829],
+      desc: '馆藏文物 18 万余件，镇馆之宝是马王堆汉墓出土的辛追夫人及大量漆器、帛画。"T 形帛画"和"素纱襌衣"是必看。新馆陈列极用心，是了解湖湘文明的最佳入口。',
+      tips: ['免费但需提前 7 天预约', '周一闭馆', '建议租讲解器或跟免费场']
+    },
+    {
+      id: 5, time: '17:00', duration: '1 小时',
+      name: 'IFS 国金中心', subtitle: 'KAWS 雕塑 · 城市观景',
+      type: '打卡', color: 'red', icon: 'fa-building',
+      coords: [28.2006, 112.9773],
+      desc: '长沙最高楼，452 米。7 楼空中雕塑花园有巨型 KAWS 雕塑，是出片圣地。可以下午茶歇脚，也可上 45 层观景台俯瞰全城。傍晚光线柔和，最适合拍照。',
+      tips: ['KAWS 在 7 楼露天花园', '观景台需购票 88 元', '商场可顺道购物']
+    },
+    {
+      id: 6, time: '18:30', duration: '1 小时',
+      name: '黄兴路步行街', subtitle: '霓虹老街 · 长沙最热闹',
+      type: '逛街', color: 'gold', icon: 'fa-store',
+      coords: [28.1976, 112.9766],
+      desc: '北起芙蓉广场，南至南门口，全长 838 米。霓虹招牌层层叠叠，夜晚亮起时如赛博朋克。茶颜悦色、文和友、各种网红店都在这一带，是长沙夜生活的总枢纽。',
+      tips: ['晚上 8 点后最美', '人很多注意财物', '茶颜悦色几乎不用排队']
+    },
+    {
+      id: 7, time: '19:30', duration: '2 小时',
+      name: '超级文和友', subtitle: '80 年代怀旧市井',
+      type: '晚餐', color: 'red', icon: 'fa-pepper-hot',
+      coords: [28.1986, 112.9711],
+      desc: '海信广场内的"市井楼"，7 层楼还原 80 年代长沙老巷子 —— 理发店、录像厅、老茶馆一应俱全。必点：口味虾、臭豆腐、猪油拌粉。拍照胜过吃饭，但味道也不差。',
+      tips: ['建议提前线上取号', '周末等位 2 小时起', '进去后慢慢逛每一层']
+    },
+    {
+      id: 8, time: '21:30', duration: '1 小时',
+      name: '杜甫江阁 · 湘江夜色', subtitle: '一江两岸灯光秀',
+      type: '夜景', color: 'gold', icon: 'fa-moon',
+      coords: [28.1901, 112.9686],
+      desc: '为纪念杜甫而建，主楼四层，立于湘江东岸。夜幕降临，江对岸的灯光秀与岳麓山遥相呼应。江风、灯火、归船 —— 是收尾长沙一日最诗意的方式。',
+      tips: ['登阁门票 30 元', '晚上 19:30 亮灯', '江边步道免费可散步']
+    }
+  ];
+
+  // ========= 渲染行程时间线 =========
+  const listEl = document.getElementById('itinerary-list');
+  listEl.innerHTML = itinerary.map((p, i) => `
+    <div class="itinerary-card relative flex items-start gap-6 md:gap-8 mb-6" data-id="${p.id}" data-coords="${p.coords.join(',')}">
+      <!-- 左侧时间 + 节点 -->
+      <div class="flex flex-col items-center flex-shrink-0" style="width: 90px;">
+        <div class="font-serif font-bold text-xl text-[var(--ink)]">${p.time}</div>
+        <div class="text-[10px] text-[var(--muted)] mt-0.5 mb-3">${p.duration}</div>
+        <div class="timeline-dot"></div>
+      </div>
+
+      <!-- 右侧卡片 -->
+      <div class="card-body flex-1 p-6 md:p-7 cursor-pointer" onclick="focusOnMap(${p.id})">
+        <div class="flex items-start justify-between gap-4 mb-4">
+          <div class="flex items-start gap-5">
+            <div class="step-num">${String(p.id).padStart(2,'0')}</div>
+            <div>
+              <div class="flex items-center gap-3 mb-2 flex-wrap">
+                <span class="type-tag ${p.type}">${p.type}</span>
+                <span class="text-xs text-[var(--muted)]"><i class="fas ${p.icon} mr-1"></i> 第 ${p.id} 站</span>
+              </div>
+              <h3 class="font-serif font-black text-2xl md:text-3xl leading-tight">${p.name}</h3>
+              <p class="text-sm text-[var(--muted)] mt-1">${p.subtitle}</p>
+            </div>
+          </div>
+          <div class="hidden md:flex flex-col items-end text-[var(--muted)] text-xs">
+            <i class="fas fa-map-marker-alt text-lg text-[var(--red)] mb-1"></i>
+            <span>${p.coords[0].toFixed(4)}<br>${p.coords[1].toFixed(4)}</span>
+          </div>
+        </div>
+
+        <p class="text-[15px] text-[var(--ink-soft)] leading-relaxed mb-5">${p.desc}</p>
+
+        <div class="grid sm:grid-cols-2 gap-4 pt-4 border-t border-[var(--line)]">
+          <div>
+            <div class="text-xs text-[var(--muted)] mb-2 flex items-center gap-2"><i class="fas fa-lightbulb text-[var(--gold)]"></i> 实用提示</div>
+            <ul class="space-y-1.5">
+              ${p.tips.map(t => `<li class="tip-li">${t}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="flex items-end justify-end">
+            <button class="pin-btn text-sm text-[var(--ink-soft)] hover:text-[var(--red)] flex items-center gap-2 transition" onclick="event.stopPropagation(); focusOnMap(${p.id})">
+              <i class="fas fa-map-marker-alt"></i> 在地图上查看
             </button>
+          </div>
         </div>
-        <div id="mobile-menu" class="md:hidden hidden px-6 pb-4" style="background:rgba(7,13,10,0.95);">
-            <a href="#home"     class="block py-2 nav-link font-body text-sm">首页</a>
-            <a href="#about"    class="block py-2 nav-link font-body text-sm">关于</a>
-            <a href="#articles" class="block py-2 nav-link font-body text-sm">文章</a>
-            <a href="#skills"   class="block py-2 nav-link font-body text-sm">技能</a>
-            <a href="#timeline" class="block py-2 nav-link font-body text-sm">足迹</a>
+      </div>
+    </div>
+  `).join('');
+
+  // ========= 渲染地图侧边列表 =========
+  const mapListEl = document.getElementById('map-list');
+  mapListEl.innerHTML = itinerary.map(p => `
+    <div class="map-list-item flex items-center gap-3 p-2.5 rounded-sm hover:bg-[var(--bg-warm)] cursor-pointer transition" data-id="${p.id}" onclick="focusOnMap(${p.id})">
+      <div class="w-7 h-7 rounded-full flex items-center justify-center font-serif font-bold text-xs flex-shrink-0"
+           style="background: ${p.color==='red'?'var(--red)':p.color==='green'?'var(--green)':'var(--gold)'}; color:#fff;">
+        ${p.id}
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="font-medium text-sm truncate">${p.name}</div>
+        <div class="text-[10px] text-[var(--muted)]">${p.time} · ${p.type}</div>
+      </div>
+      <i class="fas fa-chevron-right text-[var(--muted)] text-xs"></i>
+    </div>
+  `).join('');
+
+  // ========= 初始化地图 =========
+  const map = L.map('map', {
+    scrollWheelZoom: false,
+    zoomControl: true,
+    attributionControl: true
+  }).setView([28.1970, 112.9700], 13);
+
+  // 使用 OpenStreetMap 瓦片（无需 API key）
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap 贡献者',
+    maxZoom: 18,
+    subdomains: ['a','b','c']
+  }).addTo(map);
+
+  // 路线虚线
+  const latlngs = itinerary.map(p => p.coords);
+  L.polyline(latlngs, {
+    color: '#C8392E',
+    weight: 2,
+    opacity: 0.55,
+    dashArray: '6, 10',
+    lineCap: 'round'
+  }).addTo(map);
+
+  // 自定义 marker
+  const markers = {};
+  itinerary.forEach(p => {
+    const icon = L.divIcon({
+      className: 'marker-wrapper',
+      html: `<div class="marker-pin ${p.color}" data-id="${p.id}"><span>${p.id}</span></div>`,
+      iconSize: [34, 34],
+      iconAnchor: [17, 34],
+      popupAnchor: [0, -34]
+    });
+
+    const marker = L.marker(p.coords, { icon }).addTo(map);
+    marker.bindPopup(`
+      <div style="min-width: 220px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="background:${p.color==='red'?'#C8392E':p.color==='green'?'#1F4D3A':'#E8A33D'};color:#fff;padding:2px 8px;border-radius:2px;font-size:11px;font-weight:600;">${p.type}</span>
+          <span style="font-size:11px;color:#8B7D6F;">${p.time} · ${p.duration}</span>
         </div>
-    </nav>
+        <div style="font-family:'Noto Serif SC',serif;font-weight:700;font-size:17px;color:#2A1F1A;margin-bottom:2px;">${p.name}</div>
+        <div style="font-size:11px;color:#8B7D6F;margin-bottom:8px;">${p.subtitle}</div>
+        <div style="font-size:12px;color:#5A4A3F;line-height:1.65;border-top:1px solid #E5D7BE;padding-top:8px;">${p.desc.substring(0, 80)}...</div>
+      </div>
+    `, { maxWidth: 280 });
 
-    <!-- Hero -->
-    <header id="home" class="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <div class="glow-blob" style="width:340px;height:340px;background:rgba(0,255,136,0.12);top:18%;left:8%;"></div>
-        <div class="glow-blob" style="width:260px;height:260px;background:rgba(81,43,212,0.1);top:55%;right:8%;animation-delay:-3s;"></div>
-        <div class="glow-blob" style="width:220px;height:220px;background:rgba(255,107,53,0.07);bottom:15%;left:35%;animation-delay:-6s;"></div>
+    marker.on('click', () => highlightCard(p.id));
+    markers[p.id] = marker;
+  });
 
-        <div class="relative z-10 text-center px-6">
-            <p class="font-body text-sm tracking-widest mb-4" style="color:var(--fg-muted);">欢迎来到</p>
-            <h1 class="font-display gradient-text text-5xl sm:text-7xl md:text-8xl lg:text-9xl mb-6 leading-tight">
-                小妖的洞府
-            </h1>
-            <p class="font-body text-lg md:text-xl mb-2" style="color:var(--fg);">
-                <span id="typing-text"></span><span class="typing-cursor"></span>
-            </p>
-            <p class="font-body text-sm mt-6" style="color:var(--fg-muted);">
-                在服务器的深渊里修炼，于 .NET 的灵脉上成精
-            </p>
-            <div class="flex items-center justify-center gap-3 mt-8 flex-wrap">
-                <span class="tech-badge tech-badge-dotnet"><i class="fa-solid fa-code"></i>.NET</span>
-                <span class="tech-badge"><i class="fa-solid fa-server"></i>C#</span>
-                <span class="tech-badge"><i class="fa-solid fa-database"></i>SQL</span>
-                <span class="tech-badge"><i class="fa-solid fa-cloud"></i>DevOps</span>
-                <span class="tech-badge"><i class="fa-brands fa-docker"></i>Docker</span>
-            </div>
-        </div>
+  // 联动：点击行程卡 / 列表项 → 地图聚焦
+  function focusOnMap(id) {
+    const p = itinerary.find(x => x.id === id);
+    if (!p) return;
+    map.flyTo(p.coords, 15, { duration: 0.8 });
+    setTimeout(() => markers[id].openPopup(), 600);
+    highlightCard(id);
+    document.getElementById('map-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  window.focusOnMap = focusOnMap;
 
-        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 scroll-hint">
-            <a href="#about" aria-label="向下滚动"><i class="fas fa-chevron-down text-xl" style="color:var(--accent);opacity:0.5;"></i></a>
-        </div>
-    </header>
+  // 高亮当前激活的卡 + marker
+  function highlightCard(id) {
+    document.querySelectorAll('.itinerary-card').forEach(c => {
+      c.classList.toggle('active', +c.dataset.id === id);
+    });
+    document.querySelectorAll('.map-list-item').forEach(c => {
+      const active = +c.dataset.id === id;
+      c.classList.toggle('bg-[var(--bg-warm)]', active);
+      if (active) c.style.background = 'var(--bg-warm)';
+      else c.style.background = '';
+    });
+    document.querySelectorAll('.marker-pin').forEach(m => {
+      m.classList.toggle('active', +m.dataset.id === id);
+    });
+  }
+  window.highlightCard = highlightCard;
 
-    <!-- 主内容 -->
-    <main>
-        <!-- 关于 -->
-        <section id="about" class="relative py-24 px-6">
-            <div class="max-w-6xl mx-auto">
-                <div class="reveal text-center mb-16">
-                    <h2 class="font-display text-4xl md:text-5xl mb-4">关于小妖</h2>
-                    <div class="section-divider"></div>
-                </div>
-                <div class="reveal flex flex-col md:flex-row items-center gap-12 md:gap-16">
-                    <div class="avatar-ring flex-shrink-0">
-                        <img src="https://picsum.photos/seed/xiaoyao-avatar/300/300.jpg" alt="小妖头像" class="w-40 h-40 md:w-52 md:h-52 rounded-full object-cover">
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-display text-2xl mb-4" style="color:var(--accent);">一只深耕后端的小妖</h3>
-                        <p class="font-body leading-relaxed mb-4" style="color:var(--fg-muted);">
-                            我是小妖，一个专注于后端开发的程序员。日常用 C# 编写咒语，在 .NET 的灵脉上构建坚实的服务架构。擅长领域驱动设计、微服务拆分和高并发系统的调优与治理。
-                        </p>
-                        <p class="font-body leading-relaxed mb-8" style="color:var(--fg-muted);">
-                            坚信好的后端架构就像一座深不可测的妖洞——表面平静，内部却暗藏玄机、运转精密。从 ASP.NET Core 到 EF Core，从 Docker 到 Kubernetes，正在不断拓展自己的修炼版图。
-                        </p>
-                        <div class="grid grid-cols-3 gap-6">
-                            <div class="text-center"><div class="stat-number" data-target="156">0</div><div class="font-body text-xs mt-1" style="color:var(--fg-muted);">篇文章</div></div>
-                            <div class="text-center"><div class="stat-number" data-target="8">0</div><div class="font-body text-xs mt-1" style="color:var(--fg-muted);">年修炼</div></div>
-                            <div class="text-center"><div class="stat-number" data-target="67">0</div><div class="font-body text-xs mt-1" style="color:var(--fg-muted);">个项目</div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+  // ========= 滚动入场 =========
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-        <!-- 文章 -->
-        <section id="articles" class="relative py-24 px-6">
-            <div class="glow-blob" style="width:300px;height:300px;background:rgba(81,43,212,0.06);top:5%;left:-5%;animation-delay:-4s;"></div>
-            <div class="glow-blob" style="width:250px;height:250px;background:rgba(255,107,53,0.05);bottom:10%;right:-3%;animation-delay:-7s;"></div>
-            <div class="max-w-6xl mx-auto">
-                <div class="reveal text-center mb-16">
-                    <h2 class="font-display text-4xl md:text-5xl mb-4">妖法典籍</h2>
-                    <p class="font-body text-sm" style="color:var(--fg-muted);">小妖在后端修炼途中留下的笔记与心得</p>
-                    <div class="section-divider mt-4"></div>
-                </div>
-                <div id="articles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-            </div>
-        </section>
+  // ========= 数字计数动画 =========
+  const countIO = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        const target = +el.dataset.count;
+        let cur = 0;
+        const step = Math.max(1, Math.floor(target / 30));
+        const t = setInterval(() => {
+          cur += step;
+          if (cur >= target) { cur = target; clearInterval(t); }
+          el.textContent = cur;
+        }, 40);
+        countIO.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-count]').forEach(el => countIO.observe(el));
 
-        <!-- 技能 -->
-        <section id="skills" class="relative py-24 px-6">
-            <div class="glow-blob" style="width:400px;height:400px;background:rgba(0,255,136,0.05);top:10%;right:-8%;animation-delay:-2s;"></div>
-            <div class="max-w-6xl mx-auto">
-                <div class="reveal text-center mb-16">
-                    <h2 class="font-display text-4xl md:text-5xl mb-4">妖力值</h2>
-                    <p class="font-body text-sm" style="color:var(--fg-muted);">修炼多年的功力一览</p>
-                    <div class="section-divider mt-4"></div>
-                </div>
-                <div id="skills-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-            </div>
-        </section>
+  // ========= 进度条 =========
+  const progIO = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        const w = el.dataset.width;
+        setTimeout(() => el.style.width = w, 200);
+        progIO.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.progress-fill').forEach(el => progIO.observe(el));
 
-        <!-- 时间线 -->
-        <section id="timeline" class="relative py-24 px-6">
-            <div class="max-w-4xl mx-auto">
-                <div class="reveal text-center mb-16">
-                    <h2 class="font-display text-4xl md:text-5xl mb-4">修炼足迹</h2>
-                    <p class="font-body text-sm" style="color:var(--fg-muted);">从妖生起点到如今的旅程</p>
-                    <div class="section-divider mt-4"></div>
-                </div>
-                <div id="timeline-container" class="relative">
-                    <div class="timeline-line-v hidden md:block"></div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- 页脚 -->
-    <footer class="relative py-16 px-6" style="border-top:1px solid var(--border);">
-        <div class="max-w-6xl mx-auto text-center">
-            <h3 class="font-display text-2xl mb-6" style="color:var(--accent);">小妖洞府</h3>
-            <p class="font-body text-sm mb-8" style="color:var(--fg-muted);">在数字世界的角落，有一只小妖在默默修炼后端之道</p>
-            <div class="flex items-center justify-center gap-4 mb-8">
-                <a href="#" class="social-icon" aria-label="GitHub"><i class="fab fa-github"></i></a>
-                <a href="#" class="social-icon" aria-label="博客园"><i class="fas fa-book"></i></a>
-                <a href="#" class="social-icon" aria-label="微信"><i class="fab fa-weixin"></i></a>
-                <a href="#" class="social-icon" aria-label="掘金"><i class="fas fa-fire"></i></a>
-                <a href="#" class="social-icon" aria-label="邮箱"><i class="fas fa-envelope"></i></a>
-            </div>
-            <p class="font-body text-xs" style="color:var(--fg-muted);">&copy; 2026 小妖的洞府 · 以妖之名，行码之道</p>
-        </div>
-    </footer>
-
-    <button id="back-to-top" aria-label="回到顶部"><i class="fas fa-arrow-up"></i></button>
-
-    <script>
-    (function() {
-        'use strict';
-
-        /* ====== 数据 ====== */
-        var articles = [
-            { title: '.NET 9 深度解析：性能妖术再进化', excerpt: '.NET 9 带来了哪些底层性能优化？从 JIT 编译器改进到 GC 调整，从 Span<T> 增强到新的管道模型，深入剖析每个变更背后的设计哲学...', date: '2026-03-15', tag: '.NET', readTime: '14分钟', cover: 'https://picsum.photos/seed/xy-dotnet9/600/400.jpg' },
-            { title: 'C# 13 新特性：模式匹配的终极形态', excerpt: 'C# 13 进一步扩展了模式匹配的能力，新的列表模式、递归模式与组合器让条件逻辑如同妖术般精炼。本文逐一拆解每个新语法糖...', date: '2026-02-28', tag: 'C#', readTime: '10分钟', cover: 'https://picsum.photos/seed/xy-csharp13/600/400.jpg' },
-            { title: '领域驱动设计：从妖洞到微服务的架构之道', excerpt: '如何用 DDD 的思想拆分单体应用？从限界上下文的识别到聚合根的设计，从领域事件到最终一致性，一份实战导向的微服务架构指南...', date: '2026-02-10', tag: '架构', readTime: '18分钟', cover: 'https://picsum.photos/seed/xy-ddd/600/400.jpg' },
-            { title: 'Entity Framework Core 9 高性能调优秘术', excerpt: 'EF Core 用起来爽，慢起来也要命。拆解 N+1 查询、编译查询缓存、批量操作优化、分表分库策略，让 ORM 如妖术般流畅...', date: '2026-01-22', tag: 'EF Core', readTime: '12分钟', cover: 'https://picsum.photos/seed/xy-efcore/600/400.jpg' },
-            { title: 'Docker + K8s：小妖的容器化修炼手册', excerpt: '从 Dockerfile 编写到 K8s 编排部署，从 Helm Chart 到服务网格 Istio，一份后端工程师视角的容器化实战记录...', date: '2026-01-05', tag: 'DevOps', readTime: '16分钟', cover: 'https://picsum.photos/seed/xy-k8s/600/400.jpg' },
-            { title: 'Redis 高并发实战：妖群涌入时的缓存之道', excerpt: '当每秒十万级请求涌来，你的 Redis 还撑得住吗？缓存穿透、雪崩、击穿的防御阵法，分布式锁的精妙实现，集群方案的选择之道...', date: '2025-12-18', tag: 'Redis', readTime: '13分钟', cover: 'https://picsum.photos/seed/xy-redis/600/400.jpg' }
-        ];
-
-        var skills = [
-            { name: 'C#',               level: 95, icon: 'fa-solid fa-code',       accent: '#68217a' },
-            { name: '.NET / ASP.NET Core', level: 93, icon: 'fa-solid fa-server',     accent: '#512bd4' },
-            { name: 'Entity Framework Core', level: 88, icon: 'fa-solid fa-database', accent: '#5c2d91' },
-            { name: 'SQL Server / MySQL',  level: 85, icon: 'fa-solid fa-table',      accent: '#cc2927' },
-            { name: 'Redis',              level: 82, icon: 'fa-solid fa-bolt',        accent: '#dc382d' },
-            { name: 'Docker / K8s',       level: 78, icon: 'fa-brands fa-docker',     accent: '#2496ed' },
-            { name: 'Linux / Shell',      level: 76, icon: 'fa-brands fa-linux',      accent: '#fcc624' },
-            { name: 'CI/CD / DevOps',     level: 74, icon: 'fa-solid fa-rotate',      accent: '#ff6b35' },
-            { name: 'RabbitMQ / Kafka',   level: 72, icon: 'fa-solid fa-diagram-project', accent: '#ff6600' },
-            { name: 'TypeScript / Vue',   level: 65, icon: 'fa-brands fa-vuejs',      accent: '#4fc08d' }
-        ];
-
-        var timelineData = [
-            { year: '2026', title: '洞府新篇', desc: '博客全面升级，开始系统性输出 .NET 后端架构与 C# 深度内容，持续分享修炼心得。', side: 'left' },
-            { year: '2025', title: '架构大成', desc: '主导完成公司核心系统微服务架构改造，深入实践 DDD 与领域事件，获得架构师认证。', side: 'right' },
-            { year: '2023', title: '修炼进阶', desc: '全面拥抱 .NET 8，深入 EF Core 性能调优与分布式系统设计，开始容器化与 K8s 探索。', side: 'left' },
-            { year: '2022', title: '初入江湖', desc: '以 .NET 后端开发身份踏入职场，在团队项目中磨练技艺，初尝高并发与系统调优。', side: 'right' },
-            { year: '2020', title: '入门修炼', desc: '偶然间接触到 C# 和 .NET，从此踏上后端修仙之路，从控制台程序一路修炼到 Web API。', side: 'left' }
-        ];
-
-        var typingTexts = [
-            '在后端深渊里修炼的小妖',
-            '用 C# 编写咒语的术士',
-            '在 .NET 灵脉上筑基的修行者',
-            '以服务器为洞府的妖怪',
-            '拿 Docker 当法器的炼妖师'
-        ];
-
-        /* ====== 粒子系统 ====== */
-        var canvas = document.getElementById('particles-canvas');
-        var ctx = canvas.getContext('2d');
-        var particles = [];
-        var mouseX = -9999, mouseY = -9999;
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-
-        function Particle() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 2.5 + 0.5;
-            this.vx = (Math.random() - 0.5) * 0.35;
-            this.vy = (Math.random() - 0.5) * 0.35;
-            this.phase = Math.random() * Math.PI * 2;
-            this.phaseSpeed = Math.random() * 0.02 + 0.006;
-            var rand = Math.random();
-            if (rand < 0.55)      { this.r = 0;   this.g = 255; this.b = 136; }
-            else if (rand < 0.75) { this.r = 81;  this.g = 43;  this.b = 212; }
-            else if (rand < 0.90) { this.r = 255; this.g = 107; this.b = 53;  }
-            else                  { this.r = 180; this.g = 255; this.b = 200; }
-        }
-
-        Particle.prototype.update = function() {
-            this.phase += this.phaseSpeed;
-            var alpha = (Math.sin(this.phase) + 1) / 2 * 0.7 + 0.1;
-            var dx = mouseX - this.x;
-            var dy = mouseY - this.y;
-            var dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 220 && dist > 1) {
-                var force = (220 - dist) / 220 * 0.015;
-                this.vx += (dx / dist) * force;
-                this.vy += (dy / dist) * force;
-            }
-            this.vx *= 0.992;
-            this.vy *= 0.992;
-            this.x += this.vx;
-            this.y += this.vy;
-            if (this.x < -20) this.x = canvas.width + 20;
-            if (this.x > canvas.width + 20) this.x = -20;
-            if (this.y < -20) this.y = canvas.height + 20;
-            if (this.y > canvas.height + 20) this.y = -20;
-            return alpha;
-        };
-
-        Particle.prototype.draw = function(alpha) {
-            var r = this.r, g = this.g, b = this.b, x = this.x, y = this.y, sz = this.size;
-            var glowR = Math.max(0.1, sz * 6);
-            var grad = ctx.createRadialGradient(x, y, 0, x, y, glowR);
-            grad.addColorStop(0, 'rgba(' + r + ',' + g + ',' + b + ',' + (alpha * 0.45).toFixed(3) + ')');
-            grad.addColorStop(1, 'rgba(' + r + ',' + g + ',' + b + ',0)');
-            ctx.beginPath();
-            ctx.arc(x, y, glowR, 0, Math.PI * 2);
-            ctx.fillStyle = grad;
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x, y, Math.max(0.1, sz), 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + alpha.toFixed(3) + ')';
-            ctx.fill();
-        };
-
-        function initParticles() {
-            particles = [];
-            var count = Math.min(110, Math.floor(canvas.width * canvas.height / 14000));
-            for (var i = 0; i < count; i++) particles.push(new Particle());
-        }
-
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (var i = 0; i < particles.length; i++) {
-                var a = particles[i].update();
-                particles[i].draw(a);
-            }
-            requestAnimationFrame(animateParticles);
-        }
-
-        resizeCanvas();
-        initParticles();
-        animateParticles();
-
-        window.addEventListener('resize', function() {
-            resizeCanvas();
-            initParticles();
-        });
-
-        /* ====== 鼠标跟踪 ====== */
-        var glowEl = document.getElementById('mouse-glow');
-        document.addEventListener('mousemove', function(e) {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            glowEl.style.left = e.clientX + 'px';
-            glowEl.style.top  = e.clientY + 'px';
-        });
-
-        /* ====== 打字机 ====== */
-        var typingEl = document.getElementById('typing-text');
-        var tIdx = 0, cIdx = 0, isDeleting = false;
-
-        function typeStep() {
-            var current = typingTexts[tIdx];
-            if (!isDeleting) {
-                typingEl.textContent = current.substring(0, cIdx + 1);
-                cIdx++;
-                if (cIdx >= current.length) {
-                    isDeleting = true;
-                    setTimeout(typeStep, 2200);
-                    return;
-                }
-                setTimeout(typeStep, 80 + Math.random() * 60);
-            } else {
-                typingEl.textContent = current.substring(0, cIdx - 1);
-                cIdx--;
-                if (cIdx <= 0) {
-                    isDeleting = false;
-                    tIdx = (tIdx + 1) % typingTexts.length;
-                    setTimeout(typeStep, 500);
-                    return;
-                }
-                setTimeout(typeStep, 35);
-            }
-        }
-        typeStep();
-
-        /* ====== 导航栏 ====== */
-        var navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 60) navbar.classList.add('nav-scrolled');
-            else navbar.classList.remove('nav-scrolled');
-        });
-
-        /* ====== 移动端菜单 ====== */
-        var mobileBtn  = document.getElementById('mobile-menu-btn');
-        var mobileMenu = document.getElementById('mobile-menu');
-        mobileBtn.addEventListener('click', function() {
-            mobileMenu.classList.toggle('hidden');
-        });
-        mobileMenu.querySelectorAll('a').forEach(function(a) {
-            a.addEventListener('click', function() { mobileMenu.classList.add('hidden'); });
-        });
-
-        /* ====== 文章卡片 ====== */
-        var articlesGrid = document.getElementById('articles-grid');
-        articles.forEach(function(art, i) {
-            var isDotnet = (art.tag === '.NET' || art.tag === 'C#' || art.tag === 'EF Core');
-            var card = document.createElement('article');
-            card.className = 'tilt-card reveal rounded-xl overflow-hidden';
-            card.style.cssText = 'background:var(--card);border:1px solid var(--border);transition:transform 0.1s ease,box-shadow 0.3s ease;';
-            card.setAttribute('data-delay', (i * 100).toString());
-            card.innerHTML =
-                '<div class="overflow-hidden h-44">' +
-                    '<img src="' + art.cover + '" alt="' + art.title + '" class="article-cover w-full h-full object-cover">' +
-                '</div>' +
-                '<div class="p-5">' +
-                    '<div class="flex items-center justify-between mb-3">' +
-                        '<span class="tag' + (isDotnet ? ' tag-dotnet' : '') + '">' + art.tag + '</span>' +
-                        '<span class="font-body text-xs" style="color:var(--fg-muted);">' + art.date + '</span>' +
-                    '</div>' +
-                    '<h3 class="font-display text-lg mb-2" style="color:var(--fg);">' + art.title + '</h3>' +
-                    '<p class="font-body text-sm leading-relaxed mb-4" style="color:var(--fg-muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + art.excerpt + '</p>' +
-                    '<div class="flex items-center justify-between">' +
-                        '<span class="font-body text-xs" style="color:var(--fg-muted);"><i class="far fa-clock mr-1"></i>' + art.readTime + '</span>' +
-                        '<button class="read-more-btn" data-title="' + art.title + '">阅读更多 <i class="fas fa-arrow-right text-xs"></i></button>' +
-                    '</div>' +
-                '</div>';
-            articlesGrid.appendChild(card);
-        });
-
-        document.querySelectorAll('.tilt-card').forEach(function(card) {
-            card.addEventListener('mousemove', function(e) {
-                var rect = card.getBoundingClientRect();
-                var x = e.clientX - rect.left;
-                var y = e.clientY - rect.top;
-                var cx = rect.width / 2;
-                var cy = rect.height / 2;
-                var rx = (y - cy) / cy * -6;
-                var ry = (x - cx) / cx * 6;
-                card.style.transform = 'perspective(800px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) scale(1.02)';
-            });
-            card.addEventListener('mouseleave', function() {
-                card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) scale(1)';
-            });
-        });
-
-        document.querySelectorAll('.read-more-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                showToast('正在打开《' + btn.getAttribute('data-title') + '》...');
-            });
-        });
-
-        /* ====== 技能卡片 ====== */
-        var skillsGrid = document.getElementById('skills-grid');
-        skills.forEach(function(sk, i) {
-            var el = document.createElement('div');
-            el.className = 'reveal skill-item rounded-xl p-5 flex items-center gap-4';
-            el.style.cssText = 'background:var(--card);border:1px solid var(--border);';
-            el.setAttribute('data-delay', (i * 70).toString());
-            el.innerHTML =
-                '<div class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center text-xl" style="background:rgba(0,255,136,0.08);color:' + sk.accent + ';">' +
-                    '<i class="' + sk.icon + '"></i>' +
-                '</div>' +
-                '<div class="flex-1 min-w-0">' +
-                    '<div class="flex items-center justify-between mb-2">' +
-                        '<span class="font-body text-sm font-bold" style="color:var(--fg);">' + sk.name + '</span>' +
-                        '<span class="font-body text-xs" style="color:var(--accent);">' + sk.level + '%</span>' +
-                    '</div>' +
-                    '<div class="skill-bar">' +
-                        '<div class="skill-bar-fill" data-width="' + sk.level + '" style="background:linear-gradient(90deg,' + sk.accent + ',' + sk.accent + '88);"></div>' +
-                    '</div>' +
-                '</div>';
-            skillsGrid.appendChild(el);
-        });
-
-        /* ====== 时间线 ====== */
-        var tlContainer = document.getElementById('timeline-container');
-        timelineData.forEach(function(item, i) {
-            var isLeft = item.side === 'left';
-            var el = document.createElement('div');
-            el.className = 'reveal relative mb-12 md:mb-16';
-            el.setAttribute('data-delay', (i * 120).toString());
-
-            var mobileHTML =
-                '<div class="md:hidden pl-12">' +
-                    '<div class="timeline-dot" style="left:20px;top:4px;"></div>' +
-                    '<span class="font-display text-sm" style="color:var(--accent);">' + item.year + '</span>' +
-                    '<h3 class="font-display text-xl mt-1 mb-2" style="color:var(--fg);">' + item.title + '</h3>' +
-                    '<p class="font-body text-sm leading-relaxed" style="color:var(--fg-muted);">' + item.desc + '</p>' +
-                '</div>';
-
-            var desktopHTML =
-                '<div class="hidden md:flex items-center">' +
-                    (isLeft
-                        ? '<div class="w-5/12 pr-8 text-right">' +
-                              '<span class="font-display text-sm" style="color:var(--accent);">' + item.year + '</span>' +
-                              '<h3 class="font-display text-xl mt-1 mb-2" style="color:var(--fg);">' + item.title + '</h3>' +
-                              '<p class="font-body text-sm leading-relaxed" style="color:var(--fg-muted);">' + item.desc + '</p>' +
-                          '</div>' +
-                          '<div class="w-2/12 flex justify-center"><div class="timeline-dot" style="position:relative;left:auto;transform:none;"></div></div>' +
-                          '<div class="w-5/12 pl-8"></div>'
-                        : '<div class="w-5/12 pr-8"></div>' +
-                          '<div class="w-2/12 flex justify-center"><div class="timeline-dot" style="position:relative;left:auto;transform:none;"></div></div>' +
-                          '<div class="w-5/12 pl-8 text-left">' +
-                              '<span class="font-display text-sm" style="color:var(--accent);">' + item.year + '</span>' +
-                              '<h3 class="font-display text-xl mt-1 mb-2" style="color:var(--fg);">' + item.title + '</h3>' +
-                              '<p class="font-body text-sm leading-relaxed" style="color:var(--fg-muted);">' + item.desc + '</p>' +
-                          '</div>'
-                    ) +
-                '</div>';
-
-            el.innerHTML = mobileHTML + desktopHTML;
-            tlContainer.appendChild(el);
-        });
-
-        /* ====== IntersectionObserver ====== */
-        var revealObserver = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    var delay = parseInt(entry.target.getAttribute('data-delay') || '0', 10);
-                    setTimeout(function() { entry.target.classList.add('visible'); }, delay);
-                    revealObserver.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.12 });
-
-        document.querySelectorAll('.reveal').forEach(function(el) {
-            revealObserver.observe(el);
-        });
-
-        /* ====== 技能进度条 ====== */
-        var skillObserver = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    var fills = entry.target.querySelectorAll('.skill-bar-fill');
-                    fills.forEach(function(fill, i) {
-                        setTimeout(function() {
-                            fill.style.width = fill.getAttribute('data-width') + '%';
-                        }, i * 100);
-                    });
-                    skillObserver.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.2 });
-
-        skillObserver.observe(skillsGrid);
-
-        /* ====== 统计数字 ====== */
-        var statAnimated = false;
-        var statObserver = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting && !statAnimated) {
-                    statAnimated = true;
-                    document.querySelectorAll('.stat-number').forEach(function(el) {
-                        var target = parseInt(el.getAttribute('data-target'), 10);
-                        var current = 0;
-                        var step = Math.max(1, Math.floor(target / 50));
-                        var timer = setInterval(function() {
-                            current += step;
-                            if (current >= target) { current = target; clearInterval(timer); }
-                            el.textContent = current;
-                        }, 30);
-                    });
-                }
-            });
-        }, { threshold: 0.3 });
-
-        document.querySelectorAll('.stat-number').forEach(function(el) {
-            statObserver.observe(el.closest('.grid'));
-        });
-
-        /* ====== 回到顶部 ====== */
-        var backBtn = document.getElementById('back-to-top');
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 500) backBtn.classList.add('visible');
-            else backBtn.classList.remove('visible');
-        });
-        backBtn.addEventListener('click', function() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-
-        /* ====== Toast ====== */
-        function showToast(msg) {
-            var old = document.querySelector('.toast-msg');
-            if (old) old.remove();
-            var t = document.createElement('div');
-            t.className = 'toast-msg';
-            t.textContent = msg;
-            document.body.appendChild(t);
-            setTimeout(function() {
-                t.style.opacity = '0';
-                t.style.transition = 'opacity 0.5s ease';
-                setTimeout(function() { t.remove(); }, 500);
-            }, 2500);
-        }
-
-        /* ====== 社交图标 ====== */
-        document.querySelectorAll('.social-icon').forEach(function(icon) {
-            icon.addEventListener('click', function(e) {
-                e.preventDefault();
-                var label = icon.getAttribute('aria-label') || '社交平台';
-                showToast('即将前往' + label + '...');
-            });
-        });
-
-    })();
-    </script>
+  // ========= 顶栏阴影 =========
+  const nav = document.querySelector('nav.top-nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 30);
+  });
+</script>
 </body>
 </html>
