@@ -1,341 +1,1269 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<title>长沙世界之窗 · 一日通关指南（长沙县出发版）</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<style>
-  :root{--bg:#FBF6EE;--bg-warm:#F4E9D4;--paper:#FFFCF5;--ink:#2A1F1A;--ink-soft:#5A4A3F;--muted:#8B7D6F;--line:#E5D7BE;--red:#C8392E;--red-deep:#9E2B22;--green:#1F4D3A;--gold:#E8A33D;--shadow:0 10px 40px -10px rgba(42,31,26,.18)}
-  *{-webkit-font-smoothing:antialiased}html{scroll-behavior:smooth}
-  body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden}
-  .font-serif{font-family:'Noto Serif SC',serif}.font-brush{font-family:'Ma Shan Zheng',cursive}
-  .paper-texture{background-image:radial-gradient(circle at 18% 22%,rgba(31,77,58,.08) 0%,transparent 45%),radial-gradient(circle at 82% 70%,rgba(232,163,61,.08) 0%,transparent 45%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E")}
-  .hero-glow{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;pointer-events:none;animation:float 16s ease-in-out infinite}
-  @keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.1)}66%{transform:translate(-30px,25px) scale(.95)}}
-  .reveal{opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}.reveal.in{opacity:1;transform:translateY(0)}
-  .section-label{letter-spacing:.4em;text-transform:uppercase;font-size:11px;color:var(--muted)}
-  .stamp{display:inline-block;padding:6px 14px;border:2px solid var(--green);color:var(--green);font-family:'Noto Serif SC',serif;font-weight:700;transform:rotate(-3deg);background:rgba(31,77,58,.05)}
-  .hero-title{font-family:'Noto Serif SC',serif;font-weight:900;line-height:.92;letter-spacing:-.02em}
-  nav.top-nav{backdrop-filter:blur(12px);background:rgba(251,246,238,.88);border-bottom:1px solid var(--line);transition:box-shadow .3s}
-  nav.top-nav.scrolled{box-shadow:0 4px 24px -8px rgba(42,31,26,.12)}
-  .timeline-spine{position:absolute;left:78px;top:30px;bottom:30px;width:2px;background:linear-gradient(to bottom,transparent,var(--line) 4%,var(--line) 96%,transparent)}
-  @media(max-width:768px){.timeline-spine{left:28px}}
-  .timeline-dot{width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--green);box-shadow:0 0 0 4px var(--bg);transition:all .35s cubic-bezier(.2,.8,.2,1);z-index:2;position:relative}
-  .stop-card:hover .timeline-dot{transform:scale(1.4);background:var(--green)}
-  .stop-card.active .timeline-dot{transform:scale(1.5);background:var(--gold);border-color:var(--gold);box-shadow:0 0 0 4px var(--bg),0 0 0 8px rgba(232,163,61,.25)}
-  .stop-card{position:relative;transition:all .4s}
-  .stop-card .card-body{background:var(--paper);border:1px solid var(--line);border-radius:6px;transition:all .4s cubic-bezier(.2,.8,.2,1)}
-  .stop-card:hover .card-body{box-shadow:var(--shadow);border-color:rgba(31,77,58,.3)}
-  .stop-card.active .card-body{border-color:var(--green);box-shadow:0 12px 36px -8px rgba(31,77,58,.2)}
-  .step-num{font-family:'Noto Serif SC',serif;font-weight:900;font-size:64px;line-height:1;color:transparent;-webkit-text-stroke:1.5px var(--green);opacity:.5;transition:all .4s}
-  .stop-card.active .step-num{color:var(--green);opacity:1}
-  .type-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;font-size:11px;border-radius:2px;font-weight:500}
-  .type-tag.早餐{background:rgba(232,163,61,.15);color:#9E6B14}.type-tag.打卡{background:rgba(31,77,58,.1);color:var(--green)}.type-tag.简餐{background:rgba(232,163,61,.15);color:#9E6B14}.type-tag.乐园{background:rgba(31,77,58,.1);color:var(--green)}.type-tag.晚餐{background:rgba(200,57,46,.1);color:var(--red)}
-  .activity-box{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:14px 16px;transition:all .3s}.activity-box:hover{border-color:var(--green);background:rgba(31,77,58,.03);transform:translateY(-2px)}
-  .photo-box{display:flex;gap:14px;padding:12px 14px;background:var(--bg);border-left:3px solid var(--gold);border-radius:0 4px 4px 0;transition:all .3s}.photo-box:hover{background:rgba(232,163,61,.08);transform:translateX(4px)}
-  .food-tag{display:inline-block;padding:3px 9px;background:var(--bg-warm);border:1px solid var(--line);color:var(--ink-soft);font-size:11px;border-radius:2px}
-  .tip-li{position:relative;padding-left:14px;color:var(--ink-soft);font-size:13px;line-height:1.7}.tip-li::before{content:'';position:absolute;left:0;top:9px;width:5px;height:5px;background:var(--gold);border-radius:50%}
-  .address-bar{background:var(--bg-warm);border:1px dashed var(--line);border-radius:4px;padding:10px 14px}
-  .copy-btn{cursor:pointer;transition:all .2s}.copy-btn:hover{color:var(--red)}.copy-btn.copied{color:var(--green)}
-  .transport-bar{background:linear-gradient(90deg,rgba(31,77,58,.06),transparent);border-left:3px solid var(--green);padding:10px 14px;border-radius:0 4px 4px 0}
-  #map{height:600px;border-radius:6px;border:1px solid var(--line);filter:sepia(.15) saturate(.95) contrast(.98)}
-  .leaflet-container{background:#F4E9D4;font-family:'Noto Sans SC',sans-serif}
-  .leaflet-popup-content-wrapper{background:var(--paper);border:1px solid var(--line);border-radius:4px;box-shadow:var(--shadow)}.leaflet-popup-content{margin:14px 16px;font-family:'Noto Sans SC',sans-serif}.leaflet-popup-tip{background:var(--paper);border:1px solid var(--line)}
-  .leaflet-control-zoom a{background:var(--paper)!important;color:var(--ink)!important;border-color:var(--line)!important}.leaflet-control-zoom a:hover{background:var(--bg-warm)!important}.leaflet-control-attribution{background:rgba(251,246,238,.8)!important;color:var(--muted)!important;font-size:10px!important}
-  .marker-pin{width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2.5px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.25);transition:transform .3s}.marker-pin span{transform:rotate(45deg);color:#fff;font-weight:700;font-size:14px;font-family:'Noto Serif SC',serif}
-  .marker-pin.green{background:var(--green)}.marker-pin.gold{background:var(--gold)}.marker-pin.red{background:var(--red)}.marker-pin.active{transform:rotate(-45deg) scale(1.25)}.marker-pin.active::after{content:'';position:absolute;inset:-8px;border-radius:50%;border:2px solid currentColor;animation:pulse 1.5s ease-out infinite;opacity:.6}.marker-pin.green.active{color:var(--green)}.marker-pin.gold.active{color:var(--gold)}.marker-pin.red.active{color:var(--red)}
-  @keyframes pulse{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.6);opacity:0}}
-  .map-list-item{transition:all .2s}.map-list-item:hover{background:var(--bg-warm)}.map-list-item.active{background:var(--bg-warm);border-left:3px solid var(--green)}
-  .progress-bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}.progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:3px;transition:width 1.5s cubic-bezier(.2,.8,.2,1)}
-  .food-card{background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden;transition:all .4s}.food-card:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:var(--green)}
-  .food-card .img-wrap{height:160px;overflow:hidden;background:var(--bg-warm)}.food-card img{width:100%;height:100%;object-fit:cover;transition:transform .8s;filter:sepia(.12) saturate(1.1)}.food-card:hover img{transform:scale(1.08)}
-  .food-card .badge{position:absolute;top:10px;left:10px;background:var(--green);color:#fff;font-family:'Noto Serif SC',serif;font-weight:700;padding:3px 9px;font-size:11px;border-radius:2px}
-  .tip-card{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:24px;transition:all .4s}.tip-card:hover{border-color:var(--green);transform:translateY(-4px);box-shadow:var(--shadow)}
-  .tip-card .icon-wrap{width:44px;height:44px;background:var(--bg-warm);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--green);font-size:18px;margin-bottom:14px;transition:all .4s}.tip-card:hover .icon-wrap{background:var(--green);color:#fff}
-  .route-line{display:flex;align-items:center;gap:0;flex-wrap:nowrap;overflow-x:auto;padding:8px 0}
-  .route-stop{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:90px}.route-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif SC',serif;font-weight:700;font-size:13px;color:#fff}
-  .route-arrow{flex-shrink:0;color:var(--muted);font-size:12px;padding:0 4px}
-  ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--muted)}
-  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>优先级矩阵 · 任务与缺陷管理</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg-soft: #12121a;
+      --card: rgba(255,255,255,0.025);
+      --card-hover: rgba(255,255,255,0.05);
+      --border: rgba(255,255,255,0.07);
+      --border-strong: rgba(255,255,255,0.14);
+      --fg: #f5f5f7;
+      --fg-muted: #8b8b96;
+      --fg-dim: #5a5a64;
+      --accent: #ff5e3a;
+      --accent-soft: rgba(255,94,58,0.12);
+      --mint: #00d4a3;
+      --p0: #ff3b5c;
+      --p1: #ff8c42;
+      --p2: #ffd23f;
+      --p3: #00d4a3;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse 1000px 700px at 15% -10%, rgba(255,94,58,0.10), transparent 60%),
+        radial-gradient(ellipse 800px 500px at 90% 110%, rgba(0,212,163,0.06), transparent 60%),
+        radial-gradient(ellipse 600px 400px at 50% 50%, rgba(255,140,66,0.03), transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .display-font { font-family: 'Outfit', sans-serif; letter-spacing: -0.025em; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+    .glass { background: var(--card); border: 1px solid var(--border); backdrop-filter: blur(20px); }
+    .p0-text { color: var(--p0); }
+    .p1-text { color: var(--p1); }
+    .p2-text { color: var(--p2); }
+    .p3-text { color: var(--p3); }
+    .p0-bg { background: var(--p0); }
+    .p1-bg { background: var(--p1); }
+    .p2-bg { background: var(--p2); }
+    .p3-bg { background: var(--p3); }
+    .btn-primary {
+      background: linear-gradient(135deg, #ff5e3a 0%, #ff8c42 100%);
+      color: white; font-weight: 600;
+      transition: all 0.2s ease; border: none; cursor: pointer;
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(255,94,58,0.35); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--fg); transition: all 0.2s; cursor: pointer;
+    }
+    .btn-ghost:hover { background: var(--card); border-color: var(--border-strong); }
+    .input {
+      background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+      color: var(--fg); transition: all 0.2s; font-family: inherit;
+    }
+    .input:focus {
+      outline: none; border-color: var(--accent);
+      background: rgba(0,0,0,0.5); box-shadow: 0 0 0 3px rgba(255,94,58,0.12);
+    }
+    .input::placeholder { color: var(--fg-dim); }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.95); } }
+    @keyframes fadeOut { to { opacity: 0; transform: translateX(-20px); max-height: 0; padding: 0; margin: 0; border-width: 0; } }
+    @keyframes checkmark { 0% { transform: scale(0) rotate(-45deg); } 60% { transform: scale(1.3) rotate(0); } 100% { transform: scale(1) rotate(0); } }
+    @keyframes p0Pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,59,92,0.4); } 50% { box-shadow: 0 0 0 8px rgba(255,59,92,0); } }
+    @keyframes glowPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+    .animate-slide-in { animation: slideIn 0.3s ease-out; }
+    .pulse-dot { animation: pulse 2s infinite; }
+    .p0-glow { animation: p0Pulse 2s infinite; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .modal-backdrop { background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); }
+    .task-card { transition: all 0.2s; position: relative; }
+    .task-card:hover { transform: translateX(4px); background: var(--card-hover); border-color: var(--border-strong); }
+    .task-card:hover .quick-actions { opacity: 1; transform: translateX(0); }
+    .task-card.p0-card { box-shadow: inset 3px 0 0 var(--p0), 0 0 24px rgba(255,59,92,0.08); }
+    .quick-actions { opacity: 0; transform: translateX(8px); transition: all 0.2s; }
+    .group-content { transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; overflow: hidden; }
+    .group-collapsed .group-content { max-height: 0 !important; opacity: 0; }
+    .group-collapsed .chevron { transform: rotate(-90deg); }
+    .chevron { transition: transform 0.3s; }
+    .type-badge {
+      padding: 3px 8px; border-radius: 4px; font-size: 10px;
+      font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .type-task { background: rgba(0,212,163,0.12); color: var(--mint); border: 1px solid rgba(0,212,163,0.2); }
+    .type-bug { background: rgba(255,59,92,0.12); color: var(--p0); border: 1px solid rgba(255,59,92,0.2); }
+    .type-feature { background: rgba(255,140,66,0.12); color: var(--p1); border: 1px solid rgba(255,140,66,0.2); }
+    .type-optimize { background: rgba(255,210,63,0.12); color: var(--p2); border: 1px solid rgba(255,210,63,0.2); }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 18px 20px; position: relative;
+      overflow: hidden; transition: all 0.3s;
+    }
+    .stat-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-color, var(--accent)), transparent);
+      opacity: 0.6;
+    }
+    .stat-number {
+      font-family: 'Outfit', sans-serif; font-weight: 800;
+      font-variant-numeric: tabular-nums; letter-spacing: -0.04em; line-height: 1;
+    }
+    .toast {
+      position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+      padding: 14px 20px; border-radius: 12px; backdrop-filter: blur(20px);
+      background: rgba(20,20,28,0.95); border: 1px solid var(--border-strong);
+      display: flex; align-items: center; gap: 12px; min-width: 240px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      animation: slideInRight 0.3s ease-out;
+    }
+    .progress-ring { transform: rotate(-90deg); }
+    .filter-btn {
+      padding: 7px 11px; border-radius: 8px; font-size: 12.5px;
+      font-weight: 500; transition: all 0.2s; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      color: var(--fg-muted); border: 1px solid transparent; background: transparent;
+      text-align: left;
+    }
+    .filter-btn:hover { background: var(--card); color: var(--fg); }
+    .filter-btn.active { background: var(--accent-soft); color: var(--accent); border-color: rgba(255,94,58,0.2); }
+    .grid-pattern {
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    .empty-state { padding: 60px 24px; text-align: center; color: var(--fg-dim); }
+    .removing { animation: fadeOut 0.3s ease-out forwards; }
+    .completing { animation: checkmark 0.4s ease-out; }
+    .custom-checkbox {
+      width: 20px; height: 20px; border-radius: 6px;
+      border: 1.5px solid var(--border-strong); cursor: pointer;
+      transition: all 0.2s; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; margin-top: 2px;
+    }
+    .custom-checkbox:hover { border-color: var(--accent); transform: scale(1.1); }
+    .custom-checkbox.checked { background: var(--mint); border-color: var(--mint); }
+    .custom-checkbox.checked i { color: #0a0a0f; font-size: 11px; }
+    .history-item { transition: all 0.2s; }
+    .history-item:hover { background: var(--card); border-color: var(--border-strong); }
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .kbd {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border); color: var(--fg-muted);
+    }
+    @media (max-width: 1280px) {
+      .main-grid { grid-template-columns: 240px 1fr 300px !important; }
+    }
+    @media (max-width: 1024px) {
+      .main-grid { grid-template-columns: 1fr !important; }
+      .sidebar, .history-panel { display: none; }
+    }
+  </style>
 </head>
-<body class="paper-texture">
-
-<nav class="top-nav fixed top-0 left-0 right-0 z-50">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 bg-[var(--green)] text-white flex items-center justify-center font-serif font-bold text-lg rounded-sm">窗</div>
-      <div><div class="font-serif font-bold text-base leading-tight">世界之窗一日游</div><div class="text-[10px] tracking-widest text-[var(--muted)]">WINDOW OF WORLD · 长沙县出发</div></div>
-    </div>
-    <div class="hidden md:flex items-center gap-8 text-sm">
-      <a href="#route" class="hover:text-[var(--green)] transition">路线</a>
-      <a href="#itinerary" class="hover:text-[var(--green)] transition">详细行程</a>
-      <a href="#map-section" class="hover:text-[var(--green)] transition">地图</a>
-      <a href="#food" class="hover:text-[var(--green)] transition">美食</a>
-      <a href="#tips" class="hover:text-[var(--green)] transition">贴士</a>
-    </div>
-    <div class="text-xs text-[var(--muted)] hidden sm:flex items-center gap-2"><i class="far fa-clock"></i><span>08:00 — 20:00 · 5 站</span></div>
-  </div>
-</nav>
-
-<section class="relative pt-32 pb-20 overflow-hidden">
-  <div class="hero-glow" style="width:560px;height:560px;background:var(--green);top:-140px;left:-120px;opacity:.35;"></div>
-  <div class="hero-glow" style="width:420px;height:420px;background:var(--gold);top:160px;right:-100px;animation-delay:-5s;"></div>
-  <div class="max-w-7xl mx-auto px-6 relative">
-    <div class="grid lg:grid-cols-12 gap-10 items-end">
-      <div class="lg:col-span-8">
-        <div class="flex items-center gap-4 mb-8 reveal flex-wrap">
-          <span class="stamp">长沙县出发</span><span class="section-label">Window of the World</span><span class="text-[var(--muted)] text-xs">·  No.02 · 乐园线</span>
-        </div>
-        <h1 class="hero-title text-[64px] md:text-[112px] reveal">世界之窗<br><span class="text-[var(--green)]">一日</span><span class="font-brush text-[var(--gold)] text-[48px] md:text-[80px] ml-3">通关</span></h1>
-        <p class="mt-8 text-lg text-[var(--ink-soft)] max-w-2xl leading-relaxed reveal">从星沙出发往西，一碗津市牛肉粉开启一天，马栏山打卡后直奔世界之窗玩到傍晚。<br>晚上回星沙吃本地人最爱的「七号菜馆」，顺路不折腾，吃饱喝足直接回住处。</p>
-        <div class="mt-10 flex flex-wrap gap-4 reveal">
-          <a href="#itinerary" class="inline-flex items-center gap-2 bg-[var(--green)] text-white px-7 py-3.5 rounded-sm font-medium hover:bg-[#163828] transition group">开始通关 <i class="fas fa-arrow-right group-hover:translate-x-1 transition"></i></a>
-          <a href="#map-section" class="inline-flex items-center gap-2 border-2 border-[var(--ink)] text-[var(--ink)] px-7 py-3.5 rounded-sm font-medium hover:bg-[var(--ink)] hover:text-[var(--bg)] transition"><i class="far fa-map"></i> 查看地图</a>
-        </div>
-      </div>
-      <div class="lg:col-span-4 reveal">
-        <div class="bg-[var(--paper)] border border-[var(--line)] p-6 rounded-sm shadow-sm">
-          <div class="flex justify-between items-center pb-4 border-b border-[var(--line)]"><span class="section-label">通关总览</span><i class="fas fa-ferris-wheel text-[var(--green)]"></i></div>
-          <div class="grid grid-cols-3 gap-4 text-center py-5">
-            <div><div class="font-serif font-black text-3xl text-[var(--green)]" data-count="5">0</div><div class="text-xs text-[var(--muted)] mt-1">站点</div></div>
-            <div><div class="font-serif font-black text-3xl text-[var(--gold)]"><span data-count="12">0</span>h</div><div class="text-xs text-[var(--muted)] mt-1">时长</div></div>
-            <div><div class="font-serif font-black text-3xl text-[var(--green)]">6h+</div><div class="text-xs text-[var(--muted)] mt-1">乐园时间</div></div>
+<body>
+  <div class="relative z-10">
+    
+    <!-- Header -->
+    <header class="border-b border-white/[0.06] relative">
+      <div class="absolute inset-0 grid-pattern opacity-50 pointer-events-none"></div>
+      <div class="max-w-[1600px] mx-auto px-8 py-6 relative">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff5e3a] to-[#ff8c42] flex items-center justify-center shadow-lg shadow-orange-500/20">
+              <i class="fas fa-bolt text-white text-xl"></i>
+            </div>
+            <div>
+              <h1 class="display-font text-2xl font-black">优先级矩阵</h1>
+              <p class="text-[11px] text-[var(--fg-muted)] mono tracking-widest mt-0.5">PRIORITY · MATRIX · TRACKER</p>
+            </div>
           </div>
-          <div class="pt-4 border-t border-[var(--line)]"><div class="flex justify-between text-xs text-[var(--muted)] mb-2"><span>欢乐指数</span><span>★★★★★</span></div><div class="progress-bar"><div class="progress-fill" style="width:0%" data-width="95%"></div></div></div>
-          <div class="mt-4 pt-4 border-t border-[var(--line)] flex justify-between items-center text-xs text-[var(--muted)]"><span>建议预算</span><span class="text-[var(--ink)] font-medium">¥300 - 550 / 人</span></div>
+          
+          <div class="flex items-center gap-4">
+            <div class="text-right hidden md:block">
+              <div class="mono text-[11px] text-[var(--fg-muted)] tracking-wider" id="currentDate"></div>
+              <div class="mono text-sm font-medium" id="currentTime"></div>
+            </div>
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--mint)]/10 border border-[var(--mint)]/20">
+              <span class="status-dot bg-[var(--mint)] pulse-dot"></span>
+              <span class="text-xs text-[var(--mint)] font-medium">本地存储</span>
+            </div>
+            <button onclick="exportData()" class="btn-ghost px-3 py-2 rounded-lg text-sm flex items-center gap-2">
+              <i class="fas fa-download text-xs"></i>
+              <span class="hidden md:inline">导出</span>
+            </button>
+            <button onclick="openModal()" class="btn-ghost px-3 py-2 rounded-lg text-sm flex items-center gap-2">
+              <span class="kbd hidden md:inline">N</span>
+              <i class="fas fa-plus text-xs"></i>
+              <span class="hidden md:inline">新建</span>
+            </button>
+          </div>
         </div>
+        
+        <!-- 统计卡片 -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-8" id="statsContainer"></div>
       </div>
-    </div>
-  </div>
-</section>
-
-<section id="route" class="py-16 bg-[var(--bg-warm)]">
-  <div class="max-w-7xl mx-auto px-6">
-    <div class="mb-10 reveal"><div class="section-label mb-3">00 — 路线总览</div><h2 class="font-serif font-black text-4xl md:text-5xl">从星沙出发，不走回头路</h2><p class="mt-4 text-sm text-[var(--ink-soft)] max-w-2xl leading-relaxed">5个站点：长沙县出发往西，玩转马栏山和世界之窗，晚上回星沙吃地道湘菜。全程不绕远，午餐在乐园内简餐解决，把美食预算留给早餐和晚餐。</p></div>
-    <div class="bg-[var(--paper)] border border-[var(--line)] rounded-sm p-6 md:p-8 reveal"><div class="route-line" id="route-line"></div></div>
-  </div>
-</section>
-
-<section id="itinerary" class="py-20 relative">
-  <div class="max-w-7xl mx-auto px-6">
-    <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-16 gap-6 reveal">
-      <div><div class="section-label mb-3">01 — 详细行程</div><h2 class="font-serif font-black text-5xl md:text-6xl">傻瓜式跟着走</h2></div>
-      <div class="text-sm text-[var(--muted)] max-w-xs md:text-right leading-relaxed">每站包含：详细地址、到达方式、必玩项目、拍照机位、附近美食、实用贴士</div>
-    </div>
-    <div class="relative" id="itinerary-list"><div class="timeline-spine"></div></div>
-  </div>
-</section>
-
-<section id="map-section" class="py-20 bg-[var(--bg-warm)]">
-  <div class="max-w-7xl mx-auto px-6">
-    <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12 gap-6 reveal">
-      <div><div class="section-label mb-3">02 — 行程地图</div><h2 class="font-serif font-black text-5xl md:text-6xl">五点一线<span class="text-[var(--green)]">.</span></h2></div>
-      <div class="text-sm text-[var(--muted)] max-w-sm leading-relaxed">点击标点查看详情，点击右侧列表可定位。虚线为行进路线。</div>
-    </div>
-    <div class="grid lg:grid-cols-12 gap-6 reveal">
-      <div class="lg:col-span-8"><div id="map" class="shadow-sm"></div></div>
-      <div class="lg:col-span-4"><div class="bg-[var(--paper)] border border-[var(--line)] rounded-sm p-5 h-full"><div class="flex items-center justify-between pb-3 border-b border-[var(--line)] mb-3"><span class="section-label">站点速查</span><i class="fas fa-list-ol text-[var(--green)]"></i></div><div class="space-y-1 max-h-[560px] overflow-y-auto pr-1" id="map-list"></div></div></div>
-    </div>
-  </div>
-</section>
-
-<section id="food" class="py-20 relative">
-  <div class="max-w-7xl mx-auto px-6">
-    <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12 gap-6 reveal">
-      <div><div class="section-label mb-3">03 — 长沙高分美食榜</div><h2 class="font-serif font-black text-5xl md:text-6xl">玩够吃<span class="text-[var(--green)]">痛快</span></h2></div>
-      <div class="text-sm text-[var(--muted)] max-w-sm leading-relaxed">覆盖全程——从马栏山的早粉到星沙本地的夜宵口味虾，大众点评4.5+，本地人认证。</div>
-    </div>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal" id="food-grid"></div>
-  </div>
-</section>
-
-<section id="tips" class="py-20 bg-[var(--bg-warm)]">
-  <div class="max-w-7xl mx-auto px-6">
-    <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12 gap-6 reveal">
-      <div><div class="section-label mb-3">04 — 实用贴士</div><h2 class="font-serif font-black text-5xl md:text-6xl">少踩坑，多通关</h2></div>
-    </div>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal">
-      <div class="tip-card"><div class="icon-wrap"><i class="fas fa-ticket-alt"></i></div><h3 class="font-serif font-bold text-lg mb-2">购票</h3><p class="text-sm text-[var(--ink-soft)] leading-relaxed mb-4">世界之窗门票建议提前1天在美团/携程购买，比现场便宜30-50元。成人票约150元，夜场票更便宜（下午4点入场）。</p><ul class="space-y-1.5"><li class="tip-li">美团/携程提前1天买</li><li class="tip-li">夜场票16:00入场更划算</li><li class="tip-li">1.2米以下儿童免票</li></ul></div>
-      <div class="tip-card"><div class="icon-wrap"><i class="fas fa-tshirt"></i></div><h3 class="font-serif font-bold text-lg mb-2">着装</h3><p class="text-sm text-[var(--ink-soft)] leading-relaxed mb-4">世界之窗以室外项目为主，必须穿运动鞋（过山车等不允许穿拖鞋）。夏天带防晒+雨衣（激流勇进会湿身），冬天带厚外套。</p><ul class="space-y-1.5"><li class="tip-li">必须穿运动鞋</li><li class="tip-li">夏天带防晒霜和帽子</li><li class="tip-li">激流勇进雨衣现场买10元</li></ul></div>
-      <div class="tip-card"><div class="icon-wrap"><i class="fas fa-route"></i></div><h3 class="font-serif font-bold text-lg mb-2">园内策略</h3><p class="text-sm text-[var(--ink-soft)] leading-relaxed mb-4">进园先拿地图，按逆时针方向玩。热门项目（过山车、大摆锤）先排，下午人少时再玩小的。午餐避开12-13点高峰。</p><ul class="space-y-1.5"><li class="tip-li">进园先排过山车</li><li class="tip-li">逆时针方向效率高</li><li class="tip-li">午餐11:30或13:00去</li></ul></div>
-      <div class="tip-card"><div class="icon-wrap"><i class="fas fa-exclamation-triangle"></i></div><h3 class="font-serif font-bold text-lg mb-2">注意</h3><p class="text-sm text-[var(--ink-soft)] leading-relaxed mb-4">心脏病、高血压、孕妇不建议玩刺激项目。园内部分项目有身高限制（通常140cm以上）。带好充电宝，拍照耗电快。</p><ul class="space-y-1.5"><li class="tip-li">刺激项目前别吃太饱</li><li class="tip-li">园内餐饮贵且一般，建议自带零食</li><li class="tip-li">存物柜20元/天</li></ul></div>
-    </div>
-  </div>
-</section>
-
-<footer class="py-12 border-t border-[var(--line)]">
-  <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-    <div><div class="flex items-center gap-3 mb-2"><div class="w-8 h-8 bg-[var(--green)] text-white flex items-center justify-center font-serif font-bold rounded-sm">窗</div><span class="font-serif font-bold">长沙世界之窗 · 一日通关指南（长沙县出发版）</span></div><p class="text-xs text-[var(--muted)] max-w-md leading-relaxed">从星沙早粉到星沙夜宵，一天玩透长沙东北角。</p></div>
-    <div class="text-right"><div class="font-brush text-2xl text-[var(--green)]">玩得欢 · 吃得香</div><div class="text-xs text-[var(--muted)] mt-2 tracking-widest">CHANGSHA WINDOW · 2025</div></div>
-  </div>
-</footer>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-const itinerary=[
-  {id:1,time:'08:00',duration:'1小时',name:'刘聋子粉店',subtitle:'津市牛肉粉百年老字号 · 炖码一绝',type:'早餐',color:'gold',icon:'fa-utensils',
-   address:'开福区三一大道485号附近',fullAddress:'湖南省长沙市开福区三一大道(刘聋子粉店马栏山店)',
-   coords:[28.2245,113.0145],
-   transport:{from:'长沙县(星沙)',method:'地铁',detail:'从星沙地铁站乘地铁3号线至「月湖公园北」站3号口出，沿三一大道步行约400米即到。全程约15分钟',distance:'星沙出发约4公里',duration:'约15分钟'},
-   desc:'津市牛肉粉百年老字号，长沙本地人公认的"粉界天花板"之一。和长沙扁粉不同，津市粉是圆粉，汤头用牛骨熬制，浇头是炖得软烂的牛肉/牛杂。一碗粉+一根油条，是长沙人最经典的早餐搭配。从星沙出发刚好顺路，吃完打车5分钟到马栏山。',
-   activities:[
-     {name:'吃炖牛肉粉',duration:'20分钟',detail:'招牌必点。圆粉+牛骨汤+炖牛肉码子，鲜香浓郁'},
-     {name:'配油条/葱油饼',duration:'5分钟',detail:'油条蘸汤吃，碳水加倍快乐'},
-     {name:'加酸豆角剁椒',duration:'5分钟',detail:'自助调料台，按口味加'}
-   ],
-   photoSpots:[
-     {name:'粉店门头',tip:'老字号招牌+排队人群，长沙烟火气'},
-     {name:'一碗粉特写',tip:'俯拍，牛肉码子和金黄汤底拍清楚'},
-     {name:'油条蘸汤瞬间',tip:'抓拍油条浸入汤汁的瞬间，有食欲'}
-   ],
-   food:[{name:'炖牛肉粉',shop:'刘聋子粉店',price:'16元'},{name:'油条',shop:'刘聋子粉店',price:'3元'}],
-   tips:['早上7点开门，8:00前去人少','津市粉是圆粉，和长沙扁粉口感不同','炖牛杂也是招牌，重口味推荐','吃完打车5分钟到马栏山文创园','别点太多，留肚子给乐园']},
-  {id:2,time:'09:00',duration:'1小时',name:'马栏山视频文创园',subtitle:'湖南广电 · 中国V谷 · 打卡圣地',type:'打卡',color:'green',icon:'fa-video',
-   address:'开福区马栏山',fullAddress:'湖南省长沙市开福区马栏山视频文创产业园(湖南广播电视台旁)',
-   coords:[28.2260,113.0200],
-   transport:{from:'刘聋子粉店',method:'步行',detail:'从粉店沿三一大道向东步行约15分钟，过月湖公园即到马栏山文创园。也可打车3分钟',distance:'约1.2公里',duration:'步行15分钟 / 打车3分钟'},
-   desc:'湖南广电总部所在地，中国视频文创产业的"硅谷"。何炅、汪涵、谢娜都在这录过节目。园区里有"马栏山"地标打卡墙、湖南卫视台标合影点、各种网红咖啡馆。来世界之窗顺便来这转一圈，打卡"广电人"的氛围。',
-   activities:[
-     {name:'湖南广电大楼合影',duration:'15分钟',detail:'湖南卫视台标+大楼，追星少女必拍'},
-     {name:'马栏山地标墙',duration:'10分钟',detail:'园区入口"马栏山"三个大字，网红打卡点'},
-     {name:'逛文创咖啡店',duration:'30分钟',detail:'园区内有几家设计感咖啡店，歇脚拍照'}
-   ],
-   photoSpots:[
-     {name:'湖南卫视台标',tip:'正面仰拍台标+大楼，追星标配'},
-     {name:'马栏山地标墙',tip:'三个大字前合影，发朋友圈认证'},
-     {name:'园区咖啡店',tip:'工业风建筑+绿植，随手拍都好看'}
-   ],
-   food:[],
-   tips:['园区免费开放，不需要预约','湖南广电大楼不对外参观，只能外面拍','工作日可能偶遇明星录制','逛完去世界之窗步行约15分钟','月湖公园就在旁边，风景很好']},
-  {id:3,time:'10:00',duration:'7小时',name:'长沙世界之窗',subtitle:'过山车 · 大摆锤 · 激流勇进 · 主题乐园',type:'乐园',color:'green',icon:'fa-ferris-wheel',
-   address:'开福区三一大道485号',fullAddress:'湖南省长沙市开福区三一大道485号长沙世界之窗',
-   coords:[28.2300,113.0160],
-   transport:{from:'马栏山',method:'步行',detail:'从马栏山文创园沿三一大道向西步行约15分钟即到世界之窗正门。也可打车3分钟',distance:'约1.2公里',duration:'步行15分钟 / 打车3分钟'},
-   desc:'长沙最大的主题乐园，占地40万平米。园区按世界各地的标志性建筑1:1或1:10复制，但核心是各种刺激游乐设施——悬挂过山车、大摆锤、跳楼机、激流勇进、海盗船。上午10点入园，一直玩到傍晚17:30灯光秀，整整一天。午餐在园内简餐解决（贵但省时间），把美食预算留给晚餐。',
-   activities:[
-     {name:'悬挂过山车',duration:'15分钟',detail:'园区最火项目，先排这个。脚下悬空，俯冲+翻滚，长沙最刺激'},
-     {name:'大摆锤',duration:'10分钟',detail:'摆到最高点几乎与地面平行，失重感拉满'},
-     {name:'激流勇进',duration:'15分钟',detail:'从15米高处俯冲入水，会湿身，雨衣现场买10元'},
-     {name:'跳楼机',duration:'10分钟',detail:'56米高空弹射上升+自由落体，尖叫神器'},
-     {name:'世界建筑打卡',duration:'60分钟',detail:'微缩版埃菲尔铁塔、金字塔、泰姬陵，拍照出片'},
-     {name:'4D影院',duration:'20分钟',detail:'室内项目，排队累了去歇脚看场电影'},
-     {name:'园内简餐午餐',duration:'40分钟',detail:'12:30在园内餐厅解决，贵但省时间。建议汉堡/盖饭类，40-60元/份'},
-     {name:'晚间灯光秀',duration:'30分钟',detail:'17:30后园区灯光亮起，中心湖有灯光秀'}
-   ],
-   photoSpots:[
-     {name:'埃菲尔铁塔前',tip:'微缩铁塔+草坪，假装在巴黎'},
-     {name:'过山车俯拍',tip:'在安全区拍过山车翻转瞬间，动感十足'},
-     {name:'中心湖夜景',tip:'傍晚灯亮后，湖面倒影+建筑灯光'},
-     {name:'园区入口',tip:'大地球雕塑+世界之窗招牌，必拍'}
-   ],
-   food:[{name:'园内简餐',shop:'世界之窗内餐厅',price:'40-60元'}],
-   tips:['提前在美团买票，比现场便宜30-50元','进园先排过山车，下午人少再玩小项目','园内餐饮贵且一般，建议自带零食和水','激流勇进会湿身，买雨衣（现场10元）','存物柜20元/天，贵重物品必存','穿运动鞋，拖鞋不允许坐过山车','17:30后灯光亮起最美，别急着走','夜场票16:00入场更便宜，但玩不够']},
-  {id:4,time:'17:30',duration:'40分钟',name:'出园转场 · 打车回星沙',subtitle:'从世界之窗回长沙县 · 避开晚高峰',type:'简餐',color:'gold',icon:'fa-road',
-   address:'开福区至长沙县',fullAddress:'从长沙世界之窗打车至长沙县星沙大道(七号菜馆星沙店)',
-   coords:[28.2150,113.0350],
-   transport:{from:'世界之窗',method:'打车',detail:'从世界之窗正门打车至星沙大道七号菜馆，约6公里，走三一大道转星沙大道，15分钟即到。完美避开市中心晚高峰拥堵',distance:'约6公里',duration:'打车15分钟'},
-   desc:'从世界之窗出来，打车回星沙吃晚餐。这段路程极短，只需15分钟，刚好在车上歇歇脚、补个妆、回个消息。因为不用去市中心，完美避开了18:00-19:00五一大道的恐怖晚高峰，心情大好。',
-   activities:[
-     {name:'打车回星沙',duration:'15分钟',detail:'滴滴/高德打车，从世界之窗到星沙约15-20元'},
-     {name:'车上歇脚补能量',duration:'随时',detail:'吃点自带零食，补充体力'},
-     {name:'路过星沙中心看夜景',duration:'路过',detail:'星沙城区灯光很亮，比市中心清净'}
-   ],
-   photoSpots:[
-     {name:'三一大道黄昏',tip:'打车经过高架时拍城市天际线，黄昏最美'},
-     {name:'星沙城区夜景',tip:'车窗外抓拍，繁华但从容的长沙县'}
-   ],
-   food:[],
-   tips:['17:30准时出园，避开晚高峰','打车用滴滴/高德，比拦出租便宜','上车就导航"七号菜馆星沙店"','路上吃点零食补充体力','回星沙打车极快，不用赶时间']},
-  {id:5,time:'18:30',duration:'2小时',name:'七号菜馆',subtitle:'星沙本地人扎堆 · 地道长沙家常菜',type:'晚餐',color:'red',icon:'fa-pepper-hot',
-   address:'长沙县星沙街道',fullAddress:'湖南省长沙市长沙县星沙街道星沙大道(七号菜馆星沙店)',
-   coords:[28.2180,113.0520],
-   transport:{from:'世界之窗',method:'打车',detail:'从世界之窗打车至星沙七号菜馆，约6公里15分钟。吃完回长沙县出发地（星沙任意地点）也只要十几分钟',distance:'约6公里',duration:'打车15分钟'},
-   desc:'长沙县（星沙）本地人扎堆吃的老牌湘菜馆，大众点评4.6分。主打地道长沙家常菜，没有花里胡哨的摆盘，全是硬核下饭菜。紫苏牛蛙、原汁土猪肉、酸菜鱼是招牌。分量足价格实在，吃完回你的出发地只需十几分钟，完美收尾这一天。',
-   activities:[
-     {name:'吃紫苏牛蛙',duration:'20分钟',detail:'镇店之宝。牛蛙肉质紧实，紫苏提香，香辣入骨'},
-     {name:'点原汁土猪肉',duration:'15分钟',detail:'招牌必点。土猪肉红烧得软糯，肥而不腻'},
-     {name:'吃酸菜鱼',duration:'15分钟',detail:'鱼片嫩滑，酸菜爽口，汤底微辣鲜香'},
-     {name:'配口味虾(夏季)',duration:'15分钟',detail:'长沙夜宵标配，七号菜馆做得很地道'},
-     {name:'星沙街头散步',duration:'30分钟',detail:'吃完在星沙街头走走，感受长沙县的夜生活'}
-   ],
-   photoSpots:[
-     {name:'满桌湘菜俯拍',tip:'几道菜摆一起俯拍，红绿相间，最有食欲'},
-     {name:'紫苏牛蛙特写',tip:'红油+紫苏叶+牛蛙，近景最有冲击力'},
-     {name:'排队人群',tip:'晚上排队场景，本身就是长沙美食的认证'},
-     {name:'星沙夜景',tip:'吃完在星沙走走，比市中心更惬意'}
-   ],
-   food:[{name:'紫苏牛蛙',shop:'七号菜馆',price:'68元'},{name:'原汁土猪肉',shop:'七号菜馆',price:'38元'},{name:'酸菜鱼',shop:'七号菜馆',price:'58元'}],
-   tips:['建议提前在美团/小程序线上取号','周末等位30-60分钟，工作日不用等','人均约70-90元，性价比极高','不能吃辣提前说，可做微辣','吃完打车回长沙县出发地只要十几分钟','星沙附近有茶颜悦色，饭后必喝']}
-];
-
-document.getElementById('route-line').innerHTML=itinerary.map((p,i)=>`
-  <div class="route-stop"><div class="route-dot" style="background:${p.color==='red'?'var(--red)':p.color==='green'?'var(--green)':'var(--gold)'}">${p.id}</div><div class="text-[10px] text-center leading-tight"><div class="font-medium text-[var(--ink)]">${p.name.length>6?p.name.substring(0,5)+'…':p.name}</div><div class="text-[var(--muted)]">${p.time}</div></div></div>
-  ${i<itinerary.length-1?`<div class="route-arrow"><i class="fas fa-chevron-right"></i></div>`:''}
-`).join('');
-
-document.getElementById('itinerary-list').innerHTML+=itinerary.map(p=>`
-  <div class="stop-card relative flex items-start gap-6 md:gap-8 mb-8" data-id="${p.id}" data-coords="${p.coords.join(',')}">
-    <div class="flex flex-col items-center flex-shrink-0" style="width:90px;"><div class="font-serif font-bold text-xl text-[var(--ink)]">${p.time}</div><div class="text-[10px] text-[var(--muted)] mt-0.5 mb-3">${p.duration}</div><div class="timeline-dot"></div></div>
-    <div class="card-body flex-1 p-6 md:p-8">
-      <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
-        <div class="flex items-start gap-5"><div class="step-num">${String(p.id).padStart(2,'0')}</div><div>
-          <div class="flex items-center gap-3 mb-2 flex-wrap"><span class="type-tag ${p.type}">${p.type}</span><span class="text-xs text-[var(--muted)]"><i class="fas ${p.icon} mr-1"></i> 第 ${p.id} 站 / 共 5 站</span></div>
-          <h3 class="font-serif font-black text-2xl md:text-3xl leading-tight">${p.name}</h3><p class="text-sm text-[var(--muted)] mt-1">${p.subtitle}</p>
-        </div></div>
+    </header>
+    
+    <!-- 主内容 -->
+    <main class="max-w-[1600px] mx-auto px-8 py-6">
+      <div class="main-grid grid gap-6" style="grid-template-columns: 260px 1fr 340px;">
+        
+        <!-- 左侧栏 -->
+        <aside class="sidebar space-y-4">
+          <button onclick="openModal()" class="btn-primary w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm">
+            <i class="fas fa-plus"></i>
+            <span>新建任务</span>
+            <span class="kbd ml-2" style="background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);color:white">N</span>
+          </button>
+          
+          <div class="relative">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-[var(--fg-dim)] text-xs"></i>
+            <input type="text" id="searchInput" placeholder="搜索任务、标签..." class="input w-full pl-9 pr-3 py-2.5 rounded-lg text-sm">
+          </div>
+          
+          <div class="glass rounded-xl p-3">
+            <div class="text-[10px] mono text-[var(--fg-muted)] tracking-wider mb-2 px-2">类型</div>
+            <div class="space-y-0.5" id="typeFilters">
+              <button class="filter-btn active w-full" data-filter="type" data-value="all">
+                <i class="fas fa-layer-group text-xs w-4"></i>
+                <span>全部</span>
+                <span class="ml-auto text-xs opacity-60" id="count-type-all">0</span>
+              </button>
+              <button class="filter-btn w-full" data-filter="type" data-value="task">
+                <i class="fas fa-check-circle text-xs w-4" style="color: var(--mint)"></i>
+                <span>任务</span>
+                <span class="ml-auto text-xs opacity-60" id="count-type-task">0</span>
+              </button>
+              <button class="filter-btn w-full" data-filter="type" data-value="bug">
+                <i class="fas fa-bug text-xs w-4" style="color: var(--p0)"></i>
+                <span>缺陷</span>
+                <span class="ml-auto text-xs opacity-60" id="count-type-bug">0</span>
+              </button>
+              <button class="filter-btn w-full" data-filter="type" data-value="feature">
+                <i class="fas fa-star text-xs w-4" style="color: var(--p1)"></i>
+                <span>需求</span>
+                <span class="ml-auto text-xs opacity-60" id="count-type-feature">0</span>
+              </button>
+              <button class="filter-btn w-full" data-filter="type" data-value="optimize">
+                <i class="fas fa-rocket text-xs w-4" style="color: var(--p2)"></i>
+                <span>优化</span>
+                <span class="ml-auto text-xs opacity-60" id="count-type-optimize">0</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="glass rounded-xl p-3">
+            <div class="text-[10px] mono text-[var(--fg-muted)] tracking-wider mb-2 px-2">优先级</div>
+            <div class="space-y-0.5" id="priorityFilters">
+              <button class="filter-btn active w-full" data-filter="priority" data-value="all">
+                <span class="w-2 h-2 rounded-full bg-white/40"></span>
+                <span>全部</span>
+              </button>
+              <button class="filter-btn w-full" data-filter="priority" data-value="P0">
+                <span class="w-2 h-2 rounded-full p0-bg"></span>
+                <span>P0 紧急</span>
+                <span class="ml-auto text-xs opacity-60" id="count-p0">0</span>
+              </button>
+              <button class="filter-btn w-full" data-filter="priority" data-value="P1">
+                <span class="w-2 h-2 rounded-full p1-bg"></span>
+                <span>P1 高</span>
+                <span class="ml-auto text-xs opacity-60" id="count-p1">0</span>
+              </button>
+              <button class="filter-btn w-full" data-filter="priority" data-value="P2">
+                <span class="w-2 h-2 rounded-full p2-bg"></span>
+                <span>P2 中</span>
+                <span class="ml-auto text-xs opacity-60" id="count-p2">0</span>
+              </button>
+              <button class="filter-btn w-full" data-filter="priority" data-value="P3">
+                <span class="w-2 h-2 rounded-full p3-bg"></span>
+                <span>P3 低</span>
+                <span class="ml-auto text-xs opacity-60" id="count-p3">0</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="glass rounded-xl p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-[10px] mono text-[var(--fg-muted)] tracking-wider">优先级定义</div>
+              <i class="fas fa-circle-info text-[10px] text-[var(--fg-dim)]"></i>
+            </div>
+            <div class="space-y-2.5 text-xs">
+              <div class="flex items-start gap-2">
+                <div class="w-1 h-4 rounded-full p0-bg mt-0.5 flex-shrink-0"></div>
+                <div>
+                  <div class="font-semibold p0-text">P0 · 紧急</div>
+                  <div class="text-[var(--fg-dim)] text-[11px] mt-0.5">系统崩溃、数据丢失、阻断性 Bug</div>
+                </div>
+              </div>
+              <div class="flex items-start gap-2">
+                <div class="w-1 h-4 rounded-full p1-bg mt-0.5 flex-shrink-0"></div>
+                <div>
+                  <div class="font-semibold p1-text">P1 · 高</div>
+                  <div class="text-[var(--fg-dim)] text-[11px] mt-0.5">核心功能异常、严重性能问题</div>
+                </div>
+              </div>
+              <div class="flex items-start gap-2">
+                <div class="w-1 h-4 rounded-full p2-bg mt-0.5 flex-shrink-0"></div>
+                <div>
+                  <div class="font-semibold p2-text">P2 · 中</div>
+                  <div class="text-[var(--fg-dim)] text-[11px] mt-0.5">一般功能、普通缺陷、体验问题</div>
+                </div>
+              </div>
+              <div class="flex items-start gap-2">
+                <div class="w-1 h-4 rounded-full p3-bg mt-0.5 flex-shrink-0"></div>
+                <div>
+                  <div class="font-semibold p3-text">P3 · 低</div>
+                  <div class="text-[var(--fg-dim)] text-[11px] mt-0.5">文案调整、代码优化、非紧急</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+        
+        <!-- 中间任务列表 -->
+        <section class="space-y-4 min-w-0">
+          <div class="glass rounded-xl p-2 flex items-center justify-between gap-4 flex-wrap">
+            <div class="flex items-center gap-1 flex-wrap" id="statusFilters">
+              <button class="filter-btn active" data-filter="status" data-value="active">
+                <i class="fas fa-circle-dot text-[10px]"></i>
+                <span>进行中</span>
+              </button>
+              <button class="filter-btn" data-filter="status" data-value="pending">
+                <i class="far fa-circle text-[10px]"></i>
+                <span>待处理</span>
+              </button>
+              <button class="filter-btn" data-filter="status" data-value="in-progress">
+                <i class="fas fa-spinner text-[10px]"></i>
+                <span>处理中</span>
+              </button>
+              <button class="filter-btn" data-filter="status" data-value="all">
+                <i class="fas fa-list text-[10px]"></i>
+                <span>全部</span>
+              </button>
+            </div>
+            <div class="flex items-center gap-2 px-2">
+              <span class="text-[10px] mono text-[var(--fg-muted)]">排序</span>
+              <select id="sortSelect" class="input rounded-lg px-2 py-1 text-xs">
+                <option value="priority">按优先级</option>
+                <option value="createdAt">按创建时间</option>
+                <option value="dueDate">按截止日期</option>
+              </select>
+            </div>
+          </div>
+          
+          <div id="taskList" class="space-y-4"></div>
+        </section>
+        
+        <!-- 右侧历史记录 -->
+        <aside class="history-panel space-y-4">
+          <div class="glass rounded-xl p-5">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="display-font font-bold">完成统计</h3>
+              <i class="fas fa-chart-line text-[var(--fg-muted)] text-sm"></i>
+            </div>
+            <div class="flex items-center justify-center mb-4">
+              <div class="relative w-32 h-32">
+                <svg class="progress-ring w-full h-full" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+                  <circle id="progressCircle" cx="50" cy="50" r="42" fill="none" stroke="url(#progressGradient)" stroke-width="6" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264" style="transition: stroke-dashoffset 0.6s ease"/>
+                  <defs>
+                    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#ff5e3a"/>
+                      <stop offset="100%" stop-color="#00d4a3"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <div class="stat-number text-3xl" id="completionRate">0%</div>
+                  <div class="text-[10px] mono text-[var(--fg-muted)] tracking-wider mt-1">完成率</div>
+                </div>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-center">
+              <div class="bg-black/20 rounded-lg p-2.5">
+                <div class="stat-number text-xl text-[var(--mint)]" id="todayCount">0</div>
+                <div class="text-[10px] text-[var(--fg-muted)] mt-1">今日完成</div>
+              </div>
+              <div class="bg-black/20 rounded-lg p-2.5">
+                <div class="stat-number text-xl" id="totalCount">0</div>
+                <div class="text-[10px] text-[var(--fg-muted)] mt-1">累计完成</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="glass rounded-xl p-5">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <h3 class="display-font font-bold">历史记录</h3>
+                <span class="text-[10px] mono text-[var(--fg-muted)] px-1.5 py-0.5 rounded bg-white/5" id="historyCount">0</span>
+              </div>
+              <button onclick="clearHistory()" class="text-[10px] text-[var(--fg-muted)] hover:text-[var(--p0)] transition px-2 py-1 rounded">清空</button>
+            </div>
+            
+            <div class="flex items-center gap-1 mb-3 text-[11px]" id="historyFilters">
+              <button class="filter-btn active py-1 px-2" data-filter="history" data-value="all">全部</button>
+              <button class="filter-btn py-1 px-2" data-filter="history" data-value="today">今日</button>
+              <button class="filter-btn py-1 px-2" data-filter="history" data-value="week">本周</button>
+            </div>
+            
+            <div id="historyList" class="space-y-2 max-h-[480px] overflow-y-auto pr-1"></div>
+          </div>
+        </aside>
       </div>
-      <div class="address-bar mb-3 flex items-center gap-3 flex-wrap"><i class="fas fa-map-marker-alt text-[var(--red)]"></i><span class="text-sm font-medium text-[var(--ink)]">${p.fullAddress}</span><button class="copy-btn text-xs text-[var(--muted)] ml-auto flex items-center gap-1" onclick="copyAddress('${p.fullAddress}',this)"><i class="far fa-copy"></i> <span>复制地址</span></button></div>
-      <div class="transport-bar mb-5 flex items-start gap-3 flex-wrap text-sm"><div class="flex items-center gap-2 text-[var(--green)] font-medium flex-shrink-0"><i class="fas fa-route"></i> 从${p.transport.from}</div><div class="text-[var(--ink-soft)] flex-1 min-w-0">${p.transport.detail}<span class="text-[var(--muted)] text-xs ml-2">· ${p.transport.distance} · ${p.transport.duration}</span></div></div>
-      <p class="text-[15px] text-[var(--ink-soft)] leading-relaxed mb-6">${p.desc}</p>
-      <div class="mb-6"><h4 class="font-serif font-bold text-base mb-3 flex items-center gap-2"><i class="fas fa-star text-[var(--gold)] text-sm"></i> 必玩项目 <span class="text-xs font-normal text-[var(--muted)] ml-1">共 ${p.activities.length} 项</span></h4><div class="grid sm:grid-cols-2 gap-3">${p.activities.map(a=>`<div class="activity-box"><div class="flex items-start justify-between gap-2 mb-1"><span class="font-medium text-sm text-[var(--ink)]">${a.name}</span><span class="text-xs text-[var(--muted)] whitespace-nowrap">${a.duration}</span></div><p class="text-xs text-[var(--ink-soft)] leading-relaxed">${a.detail}</p></div>`).join('')}</div></div>
-      <div class="mb-6"><h4 class="font-serif font-bold text-base mb-3 flex items-center gap-2"><i class="fas fa-camera-retro text-[var(--green)] text-sm"></i> 拍照机位 · 景色推荐</h4><div class="space-y-2">${p.photoSpots.map(ps=>`<div class="photo-box"><i class="fas fa-image text-[var(--gold)] mt-1 flex-shrink-0"></i><div class="flex-1 min-w-0"><span class="font-medium text-sm text-[var(--ink)]">${ps.name}</span><span class="text-xs text-[var(--ink-soft)] ml-2">— ${ps.tip}</span></div></div>`).join('')}</div></div>
-      ${p.food.length>0?`<div class="mb-6"><h4 class="font-serif font-bold text-base mb-3 flex items-center gap-2"><i class="fas fa-utensils text-[var(--red)] text-sm"></i> 必吃推荐</h4><div class="flex flex-wrap gap-2">${p.food.map(f=>`<span class="food-tag">${f.name} · ${f.shop} · ${f.price}</span>`).join('')}</div></div>`:''}
-      <div class="pt-5 border-t border-[var(--line)]"><h4 class="font-serif font-bold text-base mb-3 flex items-center gap-2"><i class="fas fa-lightbulb text-[var(--gold)] text-sm"></i> 实用贴士</h4><div class="grid sm:grid-cols-2 gap-x-6 gap-y-1.5">${p.tips.map(t=>`<div class="tip-li">${t}</div>`).join('')}</div></div>
-      <div class="mt-6 pt-4 border-t border-[var(--line)] flex justify-end"><button class="text-sm text-[var(--ink-soft)] hover:text-[var(--green)] flex items-center gap-2 transition" onclick="focusOnMap(${p.id})"><i class="fas fa-map-marker-alt"></i> 在地图上查看位置</button></div>
+      
+      <!-- 底部快捷键提示 -->
+      <div class="mt-8 flex items-center justify-center gap-6 text-[11px] text-[var(--fg-dim)] pb-4">
+        <div class="flex items-center gap-2"><span class="kbd">N</span><span>新建任务</span></div>
+        <div class="flex items-center gap-2"><span class="kbd">Esc</span><span>关闭弹窗</span></div>
+        <div class="flex items-center gap-2"><span class="kbd">/</span><span>聚焦搜索</span></div>
+        <div class="flex items-center gap-2"><i class="fas fa-mouse-pointer text-[10px]"></i><span>点击复选框切换状态</span></div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- 模态框 -->
+  <div id="taskModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-backdrop absolute inset-0" onclick="closeModal()"></div>
+    <div class="glass rounded-2xl w-full max-w-lg p-6 relative animate-slide-in">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="display-font text-xl font-bold" id="modalTitle">新建任务</h2>
+          <p class="text-xs text-[var(--fg-muted)] mt-1">填写任务详情与优先级</p>
+        </div>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center text-[var(--fg-muted)]">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <form id="taskForm" class="space-y-4">
+        <input type="hidden" id="taskId">
+        
+        <div>
+          <label class="text-xs font-semibold text-[var(--fg-muted)] mb-2 block">标题 <span class="text-[var(--p0)]">*</span></label>
+          <input type="text" id="taskTitle" required class="input w-full px-3 py-2.5 rounded-lg text-sm" placeholder="简要描述任务内容">
+        </div>
+        
+        <div>
+          <label class="text-xs font-semibold text-[var(--fg-muted)] mb-2 block">详细描述</label>
+          <textarea id="taskDesc" rows="3" class="input w-full px-3 py-2.5 rounded-lg text-sm resize-none" placeholder="补充背景、复现步骤、预期行为等..."></textarea>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-semibold text-[var(--fg-muted)] mb-2 block">类型</label>
+            <div class="grid grid-cols-2 gap-1.5" id="typeSelector">
+              <button type="button" data-value="task" class="type-select-btn input rounded-lg py-2 text-xs flex items-center justify-center gap-1.5">
+                <i class="fas fa-check-circle"></i> 任务
+              </button>
+              <button type="button" data-value="bug" class="type-select-btn input rounded-lg py-2 text-xs flex items-center justify-center gap-1.5">
+                <i class="fas fa-bug"></i> Bug
+              </button>
+              <button type="button" data-value="feature" class="type-select-btn input rounded-lg py-2 text-xs flex items-center justify-center gap-1.5">
+                <i class="fas fa-star"></i> 需求
+              </button>
+              <button type="button" data-value="optimize" class="type-select-btn input rounded-lg py-2 text-xs flex items-center justify-center gap-1.5">
+                <i class="fas fa-rocket"></i> 优化
+              </button>
+            </div>
+          </div>
+          
+          <div>
+            <label class="text-xs font-semibold text-[var(--fg-muted)] mb-2 block">优先级</label>
+            <div class="grid grid-cols-2 gap-1.5" id="prioritySelector">
+              <button type="button" data-value="P0" class="priority-select-btn input rounded-lg py-2 text-xs font-bold">P0 紧急</button>
+              <button type="button" data-value="P1" class="priority-select-btn input rounded-lg py-2 text-xs font-bold">P1 高</button>
+              <button type="button" data-value="P2" class="priority-select-btn input rounded-lg py-2 text-xs font-bold">P2 中</button>
+              <button type="button" data-value="P3" class="priority-select-btn input rounded-lg py-2 text-xs font-bold">P3 低</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-semibold text-[var(--fg-muted)] mb-2 block">截止日期</label>
+            <input type="date" id="taskDue" class="input w-full px-3 py-2.5 rounded-lg text-sm">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-[var(--fg-muted)] mb-2 block">标签（逗号分隔）</label>
+            <input type="text" id="taskTags" class="input w-full px-3 py-2.5 rounded-lg text-sm" placeholder="前端, 紧急">
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-3 pt-2">
+          <button type="button" onclick="closeModal()" class="btn-ghost flex-1 py-2.5 rounded-lg text-sm">取消</button>
+          <button type="submit" class="btn-primary flex-1 py-2.5 rounded-lg text-sm">保存任务</button>
+        </div>
+      </form>
     </div>
   </div>
-`).join('');
-
-document.getElementById('map-list').innerHTML=itinerary.map(p=>`
-  <div class="map-list-item flex items-center gap-3 p-2.5 rounded-sm cursor-pointer" data-id="${p.id}" onclick="focusOnMap(${p.id})"><div class="w-7 h-7 rounded-full flex items-center justify-center font-serif font-bold text-xs flex-shrink-0 text-white" style="background:${p.color==='red'?'var(--red)':p.color==='green'?'var(--green)':'var(--gold)'}">${p.id}</div><div class="flex-1 min-w-0"><div class="font-medium text-sm truncate">${p.name}</div><div class="text-[10px] text-[var(--muted)]">${p.time} · ${p.type}</div></div><i class="fas fa-chevron-right text-[var(--muted)] text-xs"></i></div>
-`).join('');
-
-const foodData=[
-  {name:'炖牛肉粉',sub:'刘聋子 · 津市百年老字号',badge:'早餐',desc:'圆粉+牛骨汤+炖牛肉码子。汤头鲜香浓郁，牛肉软烂入味，长沙粉界天花板之一。',shop:'刘聋子粉店 马栏山店',img:'noodle3',time:'第1站 早餐 · 马栏山'},
-  {name:'紫苏牛蛙',sub:'七号菜馆 · 星沙本地人最爱',badge:'晚餐',desc:'镇店之宝。牛蛙肉质紧实，紫苏提香，香辣入骨。星沙本地人扎堆必点的招牌。',shop:'七号菜馆 星沙店',img:'niua',time:'第5站 晚餐 · 星沙'},
-  {name:'原汁土猪肉',sub:'七号菜馆 · 软糯下饭',badge:'必点',desc:'土猪肉红烧得软糯，肥而不腻，汁水拌饭绝佳。地道长沙家常味。',shop:'七号菜馆 星沙店',img:'turou',time:'第5站 晚餐 · 星沙'},
-  {name:'酸菜鱼',sub:'七号菜馆 · 鲜嫩爽口',badge:'晚餐',desc:'鱼片嫩滑，酸菜爽口，汤底微辣鲜香。分量足，吃得过瘾。',shop:'七号菜馆 星沙店',img:'suannayu',time:'第5站 晚餐 · 星沙'},
-  {name:'口味虾',sub:'彭律兄弟 · 星沙夜宵顶流',badge:'夜宵',desc:'长沙县本地人最爱的口味虾店。红亮油润，麻、辣、鲜、香四味齐发。',shop:'彭律兄弟虾尾 星沙店',img:'crayfish4',time:'加餐 · 星沙'},
-  {name:'坛宗剁椒鱼头',sub:'坛宗 · 湘菜硬菜代表',badge:'硬菜',desc:'鳙鱼头铺满红剁椒蒸制，鲜辣入骨。下面条拌汤汁是经典吃法。',shop:'坛宗剁椒鱼头 万家丽店',img:'yutou3',time:'加餐 · 万家丽'},
-  {name:'烤串',sub:'盟重烤官 · 长沙烧烤特色',badge:'夜宵',desc:'长沙特色烤串，牛油、黄喉、五花肉烤得焦香，孜然辣椒面给得足。',shop:'盟重烤官 东瓜山店',img:'kaocuan',time:'加餐 · 市中心'},
-  {name:'葱油饼',sub:'刘聋子 · 现烤',badge:'配餐',desc:'外酥内软，层次分明，蘸着粉汤吃更香。长沙早餐标配。',shop:'刘聋子粉店',img:'congyou2',time:'第1站 早餐 · 马栏山'}
-];
-document.getElementById('food-grid').innerHTML=foodData.map(f=>`
-  <div class="food-card"><div class="img-wrap relative"><img src="https://picsum.photos/seed/changsha-${f.img}/600/400.jpg" alt="${f.name}"><span class="badge">${f.badge}</span></div><div class="p-5"><h3 class="font-serif font-bold text-lg mb-1">${f.name}</h3><p class="text-xs text-[var(--muted)] mb-3">${f.sub}</p><p class="text-sm text-[var(--ink-soft)] leading-relaxed">${f.desc}</p><div class="mt-4 pt-4 border-t border-[var(--line)] flex justify-between text-xs"><span class="text-[var(--muted)]">${f.time}</span><span class="text-[var(--ink)] font-medium">${f.shop}</span></div></div></div>
-`).join('');
-
-function copyAddress(addr,btn){navigator.clipboard.writeText(addr).then(()=>{btn.classList.add('copied');btn.querySelector('span').textContent='已复制';btn.querySelector('i').className='fas fa-check';setTimeout(()=>{btn.classList.remove('copied');btn.querySelector('span').textContent='复制地址';btn.querySelector('i').className='far fa-copy'},2000)}).catch(()=>{const ta=document.createElement('textarea');ta.value=addr;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);btn.querySelector('span').textContent='已复制';setTimeout(()=>{btn.querySelector('span').textContent='复制地址'},2000)})}
-
-// 地图中心点调整为星沙与世界之窗中间
-const map=L.map('map',{scrollWheelZoom:false,zoomControl:true}).setView([28.2220,113.0320],13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap 贡献者',maxZoom:18,subdomains:['a','b','c']}).addTo(map);
-L.polyline(itinerary.map(p=>p.coords),{color:'#1F4D3A',weight:2,opacity:.55,dashArray:'6, 10',lineCap:'round'}).addTo(map);
-const markers={};
-itinerary.forEach(p=>{const icon=L.divIcon({className:'marker-wrapper',html:`<div class="marker-pin ${p.color}" data-id="${p.id}"><span>${p.id}</span></div>`,iconSize:[34,34],iconAnchor:[17,34],popupAnchor:[0,-34]});const marker=L.marker(p.coords,{icon}).addTo(map);marker.bindPopup(`<div style="min-width:220px;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="background:${p.color==='red'?'#C8392E':p.color==='green'?'#1F4D3A':'#E8A33D'};color:#fff;padding:2px 8px;border-radius:2px;font-size:11px;font-weight:600;">${p.type}</span><span style="font-size:11px;color:#8B7D6F;">${p.time} · ${p.duration}</span></div><div style="font-family:'Noto Serif SC',serif;font-weight:700;font-size:17px;color:#2A1F1A;margin-bottom:4px;">${p.name}</div><div style="font-size:11px;color:#8B7D6F;margin-bottom:8px;">${p.fullAddress}</div><div style="font-size:12px;color:#5A4A3F;line-height:1.65;border-top:1px solid #E5D7BE;padding-top:8px;">${p.desc.substring(0,90)}...</div></div>`,{maxWidth:280});marker.on('click',()=>highlightCard(p.id));markers[p.id]=marker});
-function focusOnMap(id){const p=itinerary.find(x=>x.id===id);if(!p)return;map.flyTo(p.coords,15,{duration:.8});setTimeout(()=>markers[id].openPopup(),600);highlightCard(id);document.getElementById('map-section').scrollIntoView({behavior:'smooth',block:'start'})}
-window.focusOnMap=focusOnMap;
-function highlightCard(id){document.querySelectorAll('.stop-card').forEach(c=>c.classList.toggle('active',+c.dataset.id===id));document.querySelectorAll('.map-list-item').forEach(c=>c.classList.toggle('active',+c.dataset.id===id));document.querySelectorAll('.marker-pin').forEach(m=>m.classList.toggle('active',+m.dataset.id===id))}
-window.highlightCard=highlightCard;
-const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.1});document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
-const countIO=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const el=x.target,t=+el.dataset.count;let c=0;const s=Math.max(1,Math.floor(t/30));const ti=setInterval(()=>{c+=s;if(c>=t){c=t;clearInterval(ti)}el.textContent=c},40);countIO.unobserve(el)}})},{threshold:.5});document.querySelectorAll('[data-count]').forEach(el=>countIO.observe(el));
-const progIO=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const el=x.target;setTimeout(()=>el.style.width=el.dataset.width,200);progIO.unobserve(el)}})},{threshold:.5});document.querySelectorAll('.progress-fill').forEach(el=>progIO.observe(el));
-const nav=document.querySelector('nav.top-nav');window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>30));
-</script>
+  
+  <div id="toastContainer"></div>
+  
+  <script>
+    // ===================== 数据层 =====================
+    const STORAGE_KEY = 'priority-matrix-v1';
+    
+    const defaultTasks = [
+      {
+        id: 'demo-1', title: '修复登录页面在 Safari 16 上的白屏问题',
+        description: '用户反馈在 Safari 16 上访问 /login 时白屏，控制台报 SyntaxError。需要检查构建产物的 target 配置并增加兼容性 polyfill。',
+        type: 'bug', priority: 'P0', status: 'in-progress',
+        createdAt: Date.now() - 86400000 * 1.2, completedAt: null,
+        dueDate: new Date(Date.now() + 86400000 * 1).toISOString().split('T')[0],
+        tags: ['前端', '紧急', '生产环境']
+      },
+      {
+        id: 'demo-2', title: '数据库连接池在高并发下耗尽',
+        description: '压测时发现连接池在 500 QPS 时被耗尽，需要调整池大小配置或引入连接复用策略。',
+        type: 'bug', priority: 'P0', status: 'pending',
+        createdAt: Date.now() - 86400000 * 0.5, completedAt: null,
+        dueDate: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
+        tags: ['后端', '数据库', '性能']
+      },
+      {
+        id: 'demo-3', title: '完成支付网关接口对接',
+        description: '对接支付宝与微信支付 API，包含下单、回调、对账三个核心流程。需要与财务确认对账逻辑。',
+        type: 'feature', priority: 'P1', status: 'in-progress',
+        createdAt: Date.now() - 86400000 * 3, completedAt: null,
+        dueDate: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0],
+        tags: ['支付', 'API']
+      },
+      {
+        id: 'demo-4', title: '用户注册邮件偶尔丢失',
+        description: '部分用户反馈未收到注册激活邮件，怀疑是邮件队列堆积。需排查 SES 配置与队列消费速度。',
+        type: 'bug', priority: 'P1', status: 'pending',
+        createdAt: Date.now() - 86400000 * 2, completedAt: null,
+        dueDate: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
+        tags: ['邮件', '队列']
+      },
+      {
+        id: 'demo-5', title: '首页首屏加载速度优化至 1.5s 内',
+        description: '当前 LCP 为 2.8s，需要通过图片懒加载、关键 CSS 内联、JS 分包等方式优化到 1.5s 以下。',
+        type: 'optimize', priority: 'P2', status: 'pending',
+        createdAt: Date.now() - 86400000 * 4, completedAt: null,
+        dueDate: new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0],
+        tags: ['性能', 'SEO']
+      },
+      {
+        id: 'demo-6', title: '增加深色模式切换功能',
+        description: '用户调研显示 60% 用户希望支持深色模式，需设计 token 系统并适配所有页面。',
+        type: 'feature', priority: 'P2', status: 'pending',
+        createdAt: Date.now() - 86400000 * 5, completedAt: null,
+        dueDate: new Date(Date.now() + 86400000 * 10).toISOString().split('T')[0],
+        tags: ['UI', '体验']
+      },
+      {
+        id: 'demo-7', title: '编写单元测试覆盖核心工具函数',
+        description: '当前 utils 目录测试覆盖率仅 32%，需要补充到 80% 以上。',
+        type: 'task', priority: 'P2', status: 'pending',
+        createdAt: Date.now() - 86400000 * 6, completedAt: null,
+        dueDate: new Date(Date.now() + 86400000 * 8).toISOString().split('T')[0],
+        tags: ['测试']
+      },
+      {
+        id: 'demo-8', title: '更新 npm 依赖至最新 LTS 版本',
+        description: '部分依赖存在已知安全漏洞，需升级到最新稳定版本并跑全量测试。',
+        type: 'task', priority: 'P3', status: 'pending',
+        createdAt: Date.now() - 86400000 * 7, completedAt: null, dueDate: null,
+        tags: ['依赖', '安全']
+      },
+      {
+        id: 'demo-9', title: '整理 API 文档注释格式',
+        description: '统一 JSDoc 注释风格，便于自动生成文档。',
+        type: 'optimize', priority: 'P3', status: 'pending',
+        createdAt: Date.now() - 86400000 * 8, completedAt: null, dueDate: null,
+        tags: ['文档']
+      },
+      // 已完成（历史记录）
+      {
+        id: 'demo-h1', title: '修复用户头像上传失败问题',
+        description: 'CDN 配置错误导致头像上传 403，已联系运维修复配置。',
+        type: 'bug', priority: 'P0', status: 'completed',
+        createdAt: Date.now() - 86400000 * 4, completedAt: Date.now() - 86400000 * 0.2,
+        dueDate: new Date(Date.now() - 86400000 * 0.5).toISOString().split('T')[0],
+        tags: ['CDN', '紧急']
+      },
+      {
+        id: 'demo-h2', title: '完成产品详情页改版',
+        description: '新版详情页上线，转化率提升 8%。',
+        type: 'feature', priority: 'P1', status: 'completed',
+        createdAt: Date.now() - 86400000 * 14, completedAt: Date.now() - 86400000 * 1.5,
+        dueDate: new Date(Date.now() - 86400000 * 1).toISOString().split('T')[0],
+        tags: ['UI', '转化']
+      },
+      {
+        id: 'demo-h3', title: '优化 SQL 慢查询',
+        description: '订单列表查询从 2.3s 优化到 120ms，增加联合索引。',
+        type: 'optimize', priority: 'P2', status: 'completed',
+        createdAt: Date.now() - 86400000 * 10, completedAt: Date.now() - 86400000 * 3,
+        dueDate: null, tags: ['数据库', '性能']
+      },
+      {
+        id: 'demo-h4', title: '更新 README 文档',
+        description: '补充本地开发指引与部署说明。',
+        type: 'task', priority: 'P3', status: 'completed',
+        createdAt: Date.now() - 86400000 * 8, completedAt: Date.now() - 86400000 * 6,
+        dueDate: null, tags: ['文档']
+      }
+    ];
+    
+    let tasks = [];
+    let currentFilter = { type: 'all', priority: 'all', status: 'active', history: 'all', search: '' };
+    let modalState = { type: 'task', priority: 'P2' };
+    let sortMode = 'priority';
+    
+    function loadData() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        try { tasks = JSON.parse(stored); }
+        catch (e) { tasks = [...defaultTasks]; }
+      } else {
+        tasks = [...defaultTasks];
+      }
+    }
+    
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    }
+    
+    // ===================== 工具函数 =====================
+    function uuid() {
+      return 't-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+    }
+    
+    function formatDate(ts) {
+      if (!ts) return '无截止日期';
+      const d = new Date(ts);
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const dueDay = new Date(d);
+      dueDay.setHours(0, 0, 0, 0);
+      const diff = dueDay - now;
+      const days = Math.round(diff / 86400000);
+      const dateStr = `${d.getMonth() + 1}月${d.getDate()}日`;
+      if (days < 0) return `已逾期 ${Math.abs(days)} 天 · ${dateStr}`;
+      if (days === 0) return '今日截止';
+      if (days === 1) return '明日截止';
+      if (days < 7) return `${days} 天后 · ${dateStr}`;
+      return dateStr;
+    }
+    
+    function formatHistoryTime(ts) {
+      const d = new Date(ts);
+      const now = new Date();
+      const diff = now - d;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      if (minutes < 60) return `${minutes} 分钟前`;
+      if (hours < 24) return `${hours} 小时前`;
+      if (days === 1) return '昨日 ' + d.toTimeString().slice(0, 5);
+      if (days < 7) return `${days} 天前`;
+      return `${d.getMonth() + 1}/${d.getDate()} ${d.toTimeString().slice(0, 5)}`;
+    }
+    
+    function isOverdue(task) {
+      if (!task.dueDate || task.status === 'completed') return false;
+      const due = new Date(task.dueDate);
+      due.setHours(23, 59, 59, 999);
+      return due < new Date();
+    }
+    
+    function escapeHtml(s) {
+      if (!s) return '';
+      const div = document.createElement('div');
+      div.textContent = s;
+      return div.innerHTML;
+    }
+    
+    // ===================== 渲染 =====================
+    function render() {
+      renderStats();
+      renderCounts();
+      renderTaskList();
+      renderHistory();
+      renderProgress();
+    }
+    
+    function renderStats() {
+      const active = tasks.filter(t => t.status !== 'completed');
+      const p0 = active.filter(t => t.priority === 'P0');
+      const inProgress = active.filter(t => t.status === 'in-progress');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayCompleted = tasks.filter(t => t.status === 'completed' && t.completedAt && t.completedAt >= today.getTime());
+      const totalCompleted = tasks.filter(t => t.status === 'completed');
+      
+      const stats = [
+        { label: '活动任务', value: active.length, icon: 'fa-list-check', color: 'var(--accent)' },
+        { label: 'P0 紧急', value: p0.length, icon: 'fa-fire', color: 'var(--p0)', pulse: p0.length > 0 },
+        { label: '处理中', value: inProgress.length, icon: 'fa-spinner', color: 'var(--p1)' },
+        { label: '今日完成', value: todayCompleted.length, icon: 'fa-check', color: 'var(--mint)' },
+        { label: '累计完成', value: totalCompleted.length, icon: 'fa-trophy', color: 'var(--p2)' }
+      ];
+      
+      document.getElementById('statsContainer').innerHTML = stats.map(s => `
+        <div class="stat-card" style="--accent-color: ${s.color}">
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-[11px] text-[var(--fg-muted)] mono tracking-wider">${s.label}</div>
+            <i class="fas ${s.icon} text-xs ${s.pulse ? 'pulse-dot' : ''}" style="color: ${s.color}"></i>
+          </div>
+          <div class="stat-number text-3xl" style="color: ${s.color}">${s.value}</div>
+        </div>
+      `).join('');
+    }
+    
+    function renderCounts() {
+      const active = tasks.filter(t => t.status !== 'completed');
+      document.getElementById('count-type-all').textContent = active.length;
+      document.getElementById('count-type-task').textContent = active.filter(t => t.type === 'task').length;
+      document.getElementById('count-type-bug').textContent = active.filter(t => t.type === 'bug').length;
+      document.getElementById('count-type-feature').textContent = active.filter(t => t.type === 'feature').length;
+      document.getElementById('count-type-optimize').textContent = active.filter(t => t.type === 'optimize').length;
+      document.getElementById('count-p0').textContent = active.filter(t => t.priority === 'P0').length;
+      document.getElementById('count-p1').textContent = active.filter(t => t.priority === 'P1').length;
+      document.getElementById('count-p2').textContent = active.filter(t => t.priority === 'P2').length;
+      document.getElementById('count-p3').textContent = active.filter(t => t.priority === 'P3').length;
+    }
+    
+    function getFilteredTasks() {
+      return tasks.filter(t => {
+        if (t.status === 'completed') return false;
+        if (currentFilter.type !== 'all' && t.type !== currentFilter.type) return false;
+        if (currentFilter.priority !== 'all' && t.priority !== currentFilter.priority) return false;
+        if (currentFilter.status !== 'all' && currentFilter.status !== 'active') {
+          if (t.status !== currentFilter.status) return false;
+        }
+        if (currentFilter.search) {
+          const q = currentFilter.search.toLowerCase();
+          if (!t.title.toLowerCase().includes(q) && 
+              !(t.description || '').toLowerCase().includes(q) &&
+              !(t.tags || []).some(tag => tag.toLowerCase().includes(q))) return false;
+        }
+        return true;
+      });
+    }
+    
+    function renderTaskList() {
+      const filtered = getFilteredTasks();
+      const list = document.getElementById('taskList');
+      
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="glass rounded-2xl empty-state">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/5 flex items-center justify-center">
+              <i class="fas fa-inbox text-2xl text-[var(--fg-dim)]"></i>
+            </div>
+            <div class="display-font text-lg font-bold mb-1">暂无任务</div>
+            <div class="text-sm text-[var(--fg-muted)]">点击"新建任务"开始规划你的工作</div>
+          </div>
+        `;
+        return;
+      }
+      
+      const groups = { P0: [], P1: [], P2: [], P3: [] };
+      filtered.forEach(t => { if (groups[t.priority]) groups[t.priority].push(t); });
+      
+      const sortFn = sortMode === 'createdAt' 
+        ? (a, b) => b.createdAt - a.createdAt
+        : sortMode === 'dueDate'
+        ? (a, b) => (a.dueDate ? new Date(a.dueDate).getTime() : Infinity) - (b.dueDate ? new Date(b.dueDate).getTime() : Infinity)
+        : (a, b) => a.createdAt - b.createdAt;
+      
+      Object.keys(groups).forEach(k => groups[k].sort(sortFn));
+      
+      const groupMeta = {
+        P0: { label: '紧急', desc: '立即处理', color: 'var(--p0)' },
+        P1: { label: '高', desc: '优先处理', color: 'var(--p1)' },
+        P2: { label: '中', desc: '计划处理', color: 'var(--p2)' },
+        P3: { label: '低', desc: '空闲处理', color: 'var(--p3)' }
+      };
+      
+      list.innerHTML = Object.keys(groups).map(p => {
+        const items = groups[p];
+        if (items.length === 0) return '';
+        const meta = groupMeta[p];
+        return `
+          <div class="priority-group" data-priority="${p}">
+            <div class="glass rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-white/5 transition" onclick="toggleGroup('${p}')">
+              <div class="flex items-center gap-3">
+                <i class="fas fa-chevron-down chevron text-xs text-[var(--fg-muted)]"></i>
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full" style="background: ${meta.color}"></span>
+                  <span class="display-font font-bold text-sm">${p}</span>
+                  <span class="text-xs text-[var(--fg-muted)]">${meta.label} · ${meta.desc}</span>
+                </div>
+              </div>
+              <span class="text-xs mono px-2 py-0.5 rounded-full" style="background: ${meta.color}20; color: ${meta.color}">${items.length}</span>
+            </div>
+            <div class="group-content mt-2 space-y-2" style="max-height: 5000px;">
+              ${items.map(t => renderTaskCard(t)).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function renderTaskCard(t) {
+      const typeMeta = {
+        task: { label: '任务', icon: 'fa-check-circle', class: 'type-task' },
+        bug: { label: 'Bug', icon: 'fa-bug', class: 'type-bug' },
+        feature: { label: '需求', icon: 'fa-star', class: 'type-feature' },
+        optimize: { label: '优化', icon: 'fa-rocket', class: 'type-optimize' }
+      };
+      const tm = typeMeta[t.type] || typeMeta.task;
+      const overdue = isOverdue(t);
+      const pColor = `var(--${t.priority.toLowerCase()})`;
+      const isP0 = t.priority === 'P0';
+      
+      return `
+        <div class="task-card glass rounded-xl p-4 flex items-start gap-3 ${isP0 ? 'p0-card' : ''}" data-id="${t.id}">
+          <div class="custom-checkbox ${t.status === 'in-progress' ? 'checked' : ''}" onclick="toggleStatus('${t.id}')" title="点击切换状态">
+            ${t.status === 'in-progress' ? '<i class="fas fa-check"></i>' : ''}
+          </div>
+          
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap mb-1.5">
+              <span class="type-badge ${tm.class}"><i class="fas ${tm.icon}"></i> ${tm.label}</span>
+              <span class="text-[10px] mono px-1.5 py-0.5 rounded font-bold" style="background: ${pColor}20; color: ${pColor}">${t.priority}</span>
+              ${t.status === 'in-progress' ? '<span class="text-[10px] mono px-1.5 py-0.5 rounded bg-[var(--p1)]/15 text-[var(--p1)]"><i class="fas fa-spinner text-[8px] mr-1"></i>处理中</span>' : ''}
+              ${overdue ? '<span class="text-[10px] mono px-1.5 py-0.5 rounded bg-[var(--p0)]/15 text-[var(--p0)]"><i class="fas fa-exclamation-triangle text-[8px] mr-1"></i>已逾期</span>' : ''}
+            </div>
+            <div class="font-semibold text-sm mb-1 leading-snug">${escapeHtml(t.title)}</div>
+            ${t.description ? `<div class="text-xs text-[var(--fg-muted)] leading-relaxed mb-2 line-clamp-2">${escapeHtml(t.description)}</div>` : ''}
+            <div class="flex items-center gap-2 flex-wrap text-[11px] text-[var(--fg-muted)]">
+              <span class="flex items-center gap-1">
+                <i class="far fa-clock"></i>
+                <span class="${overdue ? 'text-[var(--p0)] font-medium' : ''}">${formatDate(t.dueDate ? new Date(t.dueDate).getTime() : null)}</span>
+              </span>
+              ${(t.tags || []).slice(0, 3).map(tag => `<span class="px-1.5 py-0.5 rounded bg-white/5">${escapeHtml(tag)}</span>`).join('')}
+            </div>
+          </div>
+          
+          <div class="quick-actions flex items-center gap-1">
+            ${t.status !== 'in-progress' ? `
+              <button onclick="setStatus('${t.id}', 'in-progress')" title="开始处理" class="w-8 h-8 rounded-lg hover:bg-[var(--p1)]/15 hover:text-[var(--p1)] flex items-center justify-center text-[var(--fg-muted)] transition">
+                <i class="fas fa-play text-xs"></i>
+              </button>
+            ` : `
+              <button onclick="completeTask('${t.id}')" title="标记完成" class="w-8 h-8 rounded-lg hover:bg-[var(--mint)]/15 hover:text-[var(--mint)] flex items-center justify-center text-[var(--fg-muted)] transition">
+                <i class="fas fa-check text-xs"></i>
+              </button>
+            `}
+            <button onclick="editTask('${t.id}')" title="编辑" class="w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-[var(--fg-muted)] transition">
+              <i class="fas fa-pen text-xs"></i>
+            </button>
+            <button onclick="deleteTask('${t.id}')" title="删除" class="w-8 h-8 rounded-lg hover:bg-[var(--p0)]/15 hover:text-[var(--p0)] flex items-center justify-center text-[var(--fg-muted)] transition">
+              <i class="fas fa-trash text-xs"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+    
+    function renderHistory() {
+      const completed = tasks.filter(t => t.status === 'completed').sort((a, b) => b.completedAt - a.completedAt);
+      const filtered = completed.filter(t => {
+        if (currentFilter.history === 'all') return true;
+        const diff = Date.now() - t.completedAt;
+        if (currentFilter.history === 'today') return diff < 86400000;
+        if (currentFilter.history === 'week') return diff < 86400000 * 7;
+        return true;
+      });
+      
+      document.getElementById('historyCount').textContent = completed.length;
+      document.getElementById('totalCount').textContent = completed.length;
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayCount = completed.filter(t => t.completedAt >= today.getTime()).length;
+      document.getElementById('todayCount').textContent = todayCount;
+      
+      const list = document.getElementById('historyList');
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="text-center py-8 text-[var(--fg-dim)]">
+            <i class="fas fa-history text-xl mb-2 opacity-50"></i>
+            <div class="text-xs">暂无历史记录</div>
+          </div>
+        `;
+        return;
+      }
+      
+      const groups = {};
+      filtered.forEach(t => {
+        const d = new Date(t.completedAt);
+        const todayD = new Date();
+        todayD.setHours(0, 0, 0, 0);
+        const yesterday = new Date(todayD.getTime() - 86400000);
+        let label;
+        if (d >= todayD) label = '今日';
+        else if (d >= yesterday) label = '昨日';
+        else label = `${d.getMonth() + 1}月${d.getDate()}日`;
+        if (!groups[label]) groups[label] = [];
+        groups[label].push(t);
+      });
+      
+      list.innerHTML = Object.keys(groups).map(label => `
+        <div class="mb-3">
+          <div class="text-[10px] mono text-[var(--fg-muted)] tracking-wider mb-1.5 px-1">${label}</div>
+          ${groups[label].map(t => {
+            const pColor = `var(--${t.priority.toLowerCase()})`;
+            const typeMeta = { task: '任务', bug: 'Bug', feature: '需求', optimize: '优化' };
+            return `
+              <div class="history-item glass rounded-lg p-2.5 mb-1.5 flex items-start gap-2">
+                <div class="w-1 self-stretch rounded-full" style="background: ${pColor}; min-height: 32px;"></div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs font-medium leading-snug line-clamp-2">${escapeHtml(t.title)}</div>
+                  <div class="flex items-center gap-2 mt-1.5 text-[10px] text-[var(--fg-muted)] flex-wrap">
+                    <span class="flex items-center gap-1">
+                      <i class="fas fa-check text-[var(--mint)]"></i>
+                      ${formatHistoryTime(t.completedAt)}
+                    </span>
+                    <span class="opacity-60">${typeMeta[t.type] || '任务'}</span>
+                    <span class="mono px-1 rounded font-bold" style="background: ${pColor}20; color: ${pColor}">${t.priority}</span>
+                  </div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <button onclick="restoreTask('${t.id}')" title="恢复为待处理" class="w-6 h-6 rounded hover:bg-white/10 flex items-center justify-center text-[var(--fg-dim)] hover:text-[var(--mint)] transition">
+                    <i class="fas fa-rotate-left text-[10px]"></i>
+                  </button>
+                  <button onclick="deletePermanently('${t.id}')" title="永久删除" class="w-6 h-6 rounded hover:bg-[var(--p0)]/15 flex items-center justify-center text-[var(--fg-dim)] hover:text-[var(--p0)] transition">
+                    <i class="fas fa-times text-[10px]"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `).join('');
+    }
+    
+    function renderProgress() {
+      const total = tasks.length;
+      const completed = tasks.filter(t => t.status === 'completed').length;
+      const rate = total === 0 ? 0 : Math.round((completed / total) * 100);
+      document.getElementById('completionRate').textContent = rate + '%';
+      const circle = document.getElementById('progressCircle');
+      const circumference = 264;
+      circle.style.strokeDashoffset = circumference - (circumference * rate / 100);
+    }
+    
+    // ===================== 操作 =====================
+    function toggleStatus(id) {
+      const t = tasks.find(t => t.id === id);
+      if (!t) return;
+      if (t.status === 'pending') {
+        t.status = 'in-progress';
+        showToast('已开始处理', 'fa-play', 'var(--p1)');
+      } else if (t.status === 'in-progress') {
+        t.status = 'completed';
+        t.completedAt = Date.now();
+        showToast('任务已完成', 'fa-check', 'var(--mint)');
+      }
+      saveData();
+      render();
+    }
+    
+    function setStatus(id, status) {
+      const t = tasks.find(t => t.id === id);
+      if (!t) return;
+      t.status = status;
+      if (status === 'completed') t.completedAt = Date.now();
+      saveData();
+      render();
+      showToast(status === 'in-progress' ? '已开始处理' : '状态已更新', 'fa-play', 'var(--p1)');
+    }
+    
+    function completeTask(id) {
+      const t = tasks.find(t => t.id === id);
+      if (!t) return;
+      t.status = 'completed';
+      t.completedAt = Date.now();
+      saveData();
+      render();
+      showToast('任务已完成', 'fa-check', 'var(--mint)');
+    }
+    
+    function deleteTask(id) {
+      const card = document.querySelector(`[data-id="${id}"]`);
+      if (card) card.classList.add('removing');
+      setTimeout(() => {
+        tasks = tasks.filter(x => x.id !== id);
+        saveData();
+        render();
+        showToast('任务已删除', 'fa-trash', 'var(--p0)');
+      }, 280);
+    }
+    
+    function restoreTask(id) {
+      const t = tasks.find(t => t.id === id);
+      if (!t) return;
+      t.status = 'pending';
+      t.completedAt = null;
+      saveData();
+      render();
+      showToast('任务已恢复', 'fa-rotate-left', 'var(--mint)');
+    }
+    
+    function deletePermanently(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      saveData();
+      render();
+      showToast('已永久删除', 'fa-times', 'var(--p0)');
+    }
+    
+    function clearHistory() {
+      const count = tasks.filter(t => t.status === 'completed').length;
+      if (count === 0) {
+        showToast('历史记录为空', 'fa-info', 'var(--fg-muted)');
+        return;
+      }
+      tasks = tasks.filter(t => t.status !== 'completed');
+      saveData();
+      render();
+      showToast(`已清空 ${count} 条历史`, 'fa-broom', 'var(--p0)');
+    }
+    
+    function editTask(id) {
+      const t = tasks.find(t => t.id === id);
+      if (!t) return;
+      openModal(t);
+    }
+    
+    // ===================== 模态框 =====================
+    function openModal(task = null) {
+      const modal = document.getElementById('taskModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      
+      if (task) {
+        document.getElementById('modalTitle').textContent = '编辑任务';
+        document.getElementById('taskId').value = task.id;
+        document.getElementById('taskTitle').value = task.title;
+        document.getElementById('taskDesc').value = task.description || '';
+        document.getElementById('taskDue').value = task.dueDate || '';
+        document.getElementById('taskTags').value = (task.tags || []).join(', ');
+        modalState = { type: task.type, priority: task.priority };
+      } else {
+        document.getElementById('modalTitle').textContent = '新建任务';
+        document.getElementById('taskForm').reset();
+        document.getElementById('taskId').value = '';
+        modalState = { type: 'task', priority: 'P2' };
+      }
+      
+      updateTypeButtons();
+      updatePriorityButtons();
+      setTimeout(() => document.getElementById('taskTitle').focus(), 100);
+    }
+    
+    function closeModal() {
+      const modal = document.getElementById('taskModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+    
+    function updateTypeButtons() {
+      const colors = { task: 'var(--mint)', bug: 'var(--p0)', feature: 'var(--p1)', optimize: 'var(--p2)' };
+      document.querySelectorAll('.type-select-btn').forEach(btn => {
+        const val = btn.dataset.value;
+        const isActive = modalState.type === val;
+        if (isActive) {
+          btn.style.background = colors[val] + '20';
+          btn.style.borderColor = colors[val];
+          btn.style.color = colors[val];
+        } else {
+          btn.style.background = '';
+          btn.style.borderColor = '';
+          btn.style.color = '';
+        }
+      });
+    }
+    
+    function updatePriorityButtons() {
+      const colors = { P0: 'var(--p0)', P1: 'var(--p1)', P2: 'var(--p2)', P3: 'var(--p3)' };
+      document.querySelectorAll('.priority-select-btn').forEach(btn => {
+        const val = btn.dataset.value;
+        const isActive = modalState.priority === val;
+        if (isActive) {
+          btn.style.background = colors[val] + '20';
+          btn.style.borderColor = colors[val];
+          btn.style.color = colors[val];
+        } else {
+          btn.style.background = '';
+          btn.style.borderColor = '';
+          btn.style.color = '';
+        }
+      });
+    }
+    
+    document.getElementById('taskForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('taskId').value;
+      const title = document.getElementById('taskTitle').value.trim();
+      const desc = document.getElementById('taskDesc').value.trim();
+      const due = document.getElementById('taskDue').value;
+      const tags = document.getElementById('taskTags').value.split(',').map(s => s.trim()).filter(Boolean);
+      
+      if (!title) return;
+      
+      if (id) {
+        const t = tasks.find(t => t.id === id);
+        if (t) {
+          t.title = title;
+          t.description = desc;
+          t.type = modalState.type;
+          t.priority = modalState.priority;
+          t.dueDate = due || null;
+          t.tags = tags;
+        }
+        showToast('任务已更新', 'fa-check', 'var(--mint)');
+      } else {
+        tasks.unshift({
+          id: uuid(), title, description: desc,
+          type: modalState.type, priority: modalState.priority,
+          status: 'pending', createdAt: Date.now(),
+          completedAt: null, dueDate: due || null, tags
+        });
+        showToast('任务已创建', 'fa-plus', 'var(--accent)');
+      }
+      saveData();
+      render();
+      closeModal();
+    });
+    
+    document.querySelectorAll('.type-select-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        modalState.type = btn.dataset.value;
+        updateTypeButtons();
+      });
+    });
+    
+    document.querySelectorAll('.priority-select-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        modalState.priority = btn.dataset.value;
+        updatePriorityButtons();
+      });
+    });
+    
+    // ===================== 筛选 =====================
+    document.querySelectorAll('[data-filter]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        const value = btn.dataset.value;
+        currentFilter[filter] = value;
+        document.querySelectorAll(`[data-filter="${filter}"]`).forEach(b => {
+          b.classList.toggle('active', b.dataset.value === value);
+        });
+        render();
+      });
+    });
+    
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      currentFilter.search = e.target.value;
+      render();
+    });
+    
+    document.getElementById('sortSelect').addEventListener('change', (e) => {
+      sortMode = e.target.value;
+      render();
+    });
+    
+    // ===================== 折叠组 =====================
+    function toggleGroup(p) {
+      const group = document.querySelector(`.priority-group[data-priority="${p}"]`);
+      if (group) group.classList.toggle('group-collapsed');
+    }
+    
+    // ===================== Toast =====================
+    function showToast(message, icon = 'fa-check', color = 'var(--mint)') {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: ${color}20">
+          <i class="fas ${icon}" style="color: ${color}"></i>
+        </div>
+        <div class="text-sm font-medium">${message}</div>
+      `;
+      document.getElementById('toastContainer').appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(20px)';
+        toast.style.transition = 'all 0.3s';
+        setTimeout(() => toast.remove(), 300);
+      }, 2200);
+    }
+    
+    // ===================== 导出 =====================
+    function exportData() {
+      const data = JSON.stringify(tasks, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `priority-matrix-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('数据已导出', 'fa-download', 'var(--mint)');
+    }
+    
+    // ===================== 时钟 =====================
+    function updateClock() {
+      const now = new Date();
+      const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+      document.getElementById('currentDate').textContent = 
+        `${now.getFullYear()}.${(now.getMonth()+1).toString().padStart(2,'0')}.${now.getDate().toString().padStart(2,'0')} · ${days[now.getDay()]}`;
+      document.getElementById('currentTime').textContent = 
+        `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+    }
+    
+    // ===================== 初始化 =====================
+    loadData();
+    render();
+    updateClock();
+    setInterval(updateClock, 1000);
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+      const inInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);
+      if (e.key.toLowerCase() === 'n' && !inInput && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        openModal();
+      }
+      if (e.key === '/' && !inInput) {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+      }
+    });
+  </script>
 </body>
 </html>
