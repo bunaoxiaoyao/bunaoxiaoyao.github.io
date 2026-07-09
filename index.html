@@ -91,22 +91,67 @@
       background: rgba(0,0,0,0.5); box-shadow: 0 0 0 3px rgba(255,94,58,0.12);
     }
     .input::placeholder { color: var(--fg-dim); }
+    /* datetime-local 深色适配 */
+    input[type="datetime-local"] {
+      color-scheme: dark;
+    }
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.8);
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+      opacity: 1;
+    }
     @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
     @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.95); } }
     @keyframes fadeOut { to { opacity: 0; transform: translateX(-20px); max-height: 0; padding: 0; margin: 0; border-width: 0; } }
     @keyframes checkmark { 0% { transform: scale(0) rotate(-45deg); } 60% { transform: scale(1.3) rotate(0); } 100% { transform: scale(1) rotate(0); } }
     @keyframes p0Pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,59,92,0.4); } 50% { box-shadow: 0 0 0 8px rgba(255,59,92,0); } }
     @keyframes glowPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+    /* 截止提醒相关动画 */
+    @keyframes deadlineOverlayPulse {
+      0%, 100% { background: rgba(255,59,92,0.25); }
+      50% { background: rgba(255,59,92,0.45); }
+    }
+    @keyframes deadlineShake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+      20%, 40%, 60%, 80% { transform: translateX(8px); }
+    }
+    @keyframes deadlineRing {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes urgentBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    @keyframes reminderGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,140,66,0.5); }
+      50% { box-shadow: 0 0 0 12px rgba(255,140,66,0); }
+    }
+    @keyframes countdownFlip {
+      0% { transform: rotateX(0deg); }
+      50% { transform: rotateX(90deg); }
+      100% { transform: rotateX(0deg); }
+    }
     .animate-slide-in { animation: slideIn 0.3s ease-out; }
     .pulse-dot { animation: pulse 2s infinite; }
     .p0-glow { animation: p0Pulse 2s infinite; }
+    .urgent-blink { animation: urgentBlink 1s infinite; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
     .modal-backdrop { background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); }
     .task-card { transition: all 0.2s; position: relative; }
     .task-card:hover { transform: translateX(4px); background: var(--card-hover); border-color: var(--border-strong); }
     .task-card:hover .quick-actions { opacity: 1; transform: translateX(0); }
     .task-card.p0-card { box-shadow: inset 3px 0 0 var(--p0), 0 0 24px rgba(255,59,92,0.08); }
+    .task-card.urgent-card { animation: reminderGlow 2s infinite; border-color: rgba(255,140,66,0.4) !important; }
+    .task-card.overdue-now { border-color: var(--p0) !important; box-shadow: inset 3px 0 0 var(--p0), 0 0 30px rgba(255,59,92,0.3) !important; }
     .quick-actions { opacity: 0; transform: translateX(8px); transition: all 0.2s; }
     .group-content { transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; overflow: hidden; }
     .group-collapsed .group-content { max-height: 0 !important; opacity: 0; }
@@ -144,6 +189,11 @@
       box-shadow: 0 20px 60px rgba(0,0,0,0.5);
       animation: slideInRight 0.3s ease-out;
     }
+    .toast.reminder-toast {
+      border-color: var(--p1);
+      box-shadow: 0 20px 60px rgba(255,140,66,0.3);
+      animation: slideInRight 0.4s ease-out, reminderGlow 2s infinite;
+    }
     .progress-ring { transform: rotate(-90deg); }
     .filter-btn {
       padding: 7px 11px; border-radius: 8px; font-size: 12.5px;
@@ -180,6 +230,116 @@
       padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.06);
       border: 1px solid var(--border); color: var(--fg-muted);
     }
+    
+    /* ===== 截止时间到 - 全屏提醒动画 ===== */
+    .deadline-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(12px);
+      animation: deadlineOverlayPulse 1.2s ease-in-out infinite;
+    }
+    .deadline-modal {
+      background: linear-gradient(145deg, #1a0a10, #12121a);
+      border: 2px solid var(--p0);
+      border-radius: 24px;
+      padding: 48px 40px;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+      position: relative;
+      animation: deadlineRing 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 0 100px rgba(255,59,92,0.5), 0 0 200px rgba(255,59,92,0.2);
+    }
+    .deadline-modal::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 24px;
+      padding: 2px;
+      background: linear-gradient(135deg, var(--p0), var(--p1), var(--p0));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: glowPulse 1.5s infinite;
+    }
+    .deadline-icon-ring {
+      width: 96px; height: 96px; margin: 0 auto 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,59,92,0.3), rgba(255,59,92,0.05));
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      animation: deadlineShake 0.8s ease-in-out;
+    }
+    .deadline-icon-ring::before {
+      content: '';
+      position: absolute; inset: -8px;
+      border-radius: 50%;
+      border: 2px solid var(--p0);
+      opacity: 0.3;
+      animation: pulse 1.5s infinite;
+    }
+    .deadline-icon-ring i {
+      font-size: 40px;
+      color: var(--p0);
+    }
+    .deadline-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--p0), var(--p1));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .deadline-task-name {
+      font-size: 16px; font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .deadline-desc {
+      font-size: 13px;
+      color: var(--fg-muted);
+      margin-bottom: 28px;
+    }
+    .deadline-actions {
+      display: flex; gap: 10px; justify-content: center;
+    }
+    .deadline-btn {
+      padding: 11px 22px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .deadline-btn.primary {
+      background: linear-gradient(135deg, var(--p0), #ff5577);
+      color: white;
+    }
+    .deadline-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,59,92,0.4); }
+    .deadline-btn.ghost {
+      background: rgba(255,255,255,0.05);
+      color: var(--fg);
+      border: 1px solid var(--border-strong);
+    }
+    .deadline-btn.ghost:hover { background: rgba(255,255,255,0.1); }
+    
+    /* 通知权限提示条 */
+    .notif-perm-banner {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 9998;
+      background: linear-gradient(90deg, rgba(255,94,58,0.95), rgba(255,140,66,0.95));
+      backdrop-filter: blur(20px);
+      padding: 10px 24px;
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      font-size: 13px; color: white; font-weight: 500;
+      animation: slideIn 0.4s ease-out;
+    }
+    
     @media (max-width: 1280px) {
       .main-grid { grid-template-columns: 240px 1fr 300px !important; }
     }
@@ -191,6 +351,16 @@
 </head>
 <body>
   <div class="relative z-10">
+    
+    <!-- 通知权限提示条 -->
+    <div id="notifBanner" class="notif-perm-banner" style="display:none;">
+      <i class="fas fa-bell"></i>
+      <span>开启浏览器通知，可在截止前 30 分钟收到桌面提醒</span>
+      <button onclick="enableNotifications()" class="px-3 py-1 rounded-md bg-white/20 hover:bg-white/30 transition text-xs font-bold">开启</button>
+      <button onclick="dismissNotifBanner()" class="px-2 py-1 rounded-md hover:bg-white/20 transition text-xs">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
     
     <!-- Header -->
     <header class="border-b border-white/[0.06] relative">
@@ -212,9 +382,9 @@
               <div class="mono text-[11px] text-[var(--fg-muted)] tracking-wider" id="currentDate"></div>
               <div class="mono text-sm font-medium" id="currentTime"></div>
             </div>
-            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--mint)]/10 border border-[var(--mint)]/20">
-              <span class="status-dot bg-[var(--mint)] pulse-dot"></span>
-              <span class="text-xs text-[var(--mint)] font-medium">本地存储</span>
+            <div id="notifStatus" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 cursor-pointer transition hover:bg-white/10" onclick="enableNotifications()" title="点击开启通知">
+              <span class="status-dot bg-[var(--fg-dim)]"></span>
+              <span class="text-xs text-[var(--fg-muted)] font-medium">通知未开启</span>
             </div>
             <button onclick="exportData()" class="btn-ghost px-3 py-2 rounded-lg text-sm flex items-center gap-2">
               <i class="fas fa-download text-xs"></i>
@@ -375,7 +545,7 @@
               <select id="sortSelect" class="input rounded-lg px-2 py-1 text-xs">
                 <option value="priority">按优先级</option>
                 <option value="createdAt">按创建时间</option>
-                <option value="dueDate">按截止日期</option>
+                <option value="dueDate">按截止时间</option>
               </select>
             </div>
           </div>
@@ -441,11 +611,12 @@
       </div>
       
       <!-- 底部快捷键提示 -->
-      <div class="mt-8 flex items-center justify-center gap-6 text-[11px] text-[var(--fg-dim)] pb-4">
+      <div class="mt-8 flex items-center justify-center gap-6 text-[11px] text-[var(--fg-dim)] pb-4 flex-wrap">
         <div class="flex items-center gap-2"><span class="kbd">N</span><span>新建任务</span></div>
         <div class="flex items-center gap-2"><span class="kbd">Esc</span><span>关闭弹窗</span></div>
         <div class="flex items-center gap-2"><span class="kbd">/</span><span>聚焦搜索</span></div>
         <div class="flex items-center gap-2"><i class="fas fa-mouse-pointer text-[10px]"></i><span>点击复选框切换状态</span></div>
+        <div class="flex items-center gap-2"><i class="fas fa-bell text-[10px]"></i><span>截止前 30 分钟桌面提醒</span></div>
       </div>
     </main>
   </div>
@@ -453,7 +624,7 @@
   <!-- 模态框 -->
   <div id="taskModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
     <div class="modal-backdrop absolute inset-0" onclick="closeModal()"></div>
-    <div class="glass rounded-2xl w-full max-w-lg p-6 relative animate-slide-in">
+    <div class="glass rounded-2xl w-full max-w-lg p-6 relative animate-slide-in max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between mb-6">
         <div>
           <h2 class="display-font text-xl font-bold" id="modalTitle">新建任务</h2>
@@ -509,13 +680,29 @@
         
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-semibold text-[var(--fg-muted)] mb-2 block">截止日期</label>
-            <input type="date" id="taskDue" class="input w-full px-3 py-2.5 rounded-lg text-sm">
+            <label class="text-xs font-semibold text-[var(--fg-muted)] mb-2 block flex items-center gap-1.5">
+              <i class="fas fa-clock text-[10px]"></i> 截止时间
+            </label>
+            <input type="datetime-local" id="taskDue" step="1" class="input w-full px-3 py-2.5 rounded-lg text-sm">
+            <div class="text-[10px] text-[var(--fg-dim)] mt-1.5 flex items-center gap-1">
+              <i class="fas fa-bell text-[9px]" style="color: var(--p1)"></i>
+              <span>将在截止前 30 分钟提醒你</span>
+            </div>
           </div>
           <div>
             <label class="text-xs font-semibold text-[var(--fg-muted)] mb-2 block">标签（逗号分隔）</label>
             <input type="text" id="taskTags" class="input w-full px-3 py-2.5 rounded-lg text-sm" placeholder="前端, 紧急">
           </div>
+        </div>
+        
+        <!-- 快捷时间选择 -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] mono text-[var(--fg-muted)]">快捷设置：</span>
+          <button type="button" onclick="setQuickDue(1)" class="text-[10px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition text-[var(--fg-muted)]">1小时后</button>
+          <button type="button" onclick="setQuickDue(4)" class="text-[10px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition text-[var(--fg-muted)]">4小时后</button>
+          <button type="button" onclick="setQuickDue(24)" class="text-[10px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition text-[var(--fg-muted)]">明天此时</button>
+          <button type="button" onclick="setQuickDue(72)" class="text-[10px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition text-[var(--fg-muted)]">3天后</button>
+          <button type="button" onclick="setQuickDue(168)" class="text-[10px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition text-[var(--fg-muted)]">一周后</button>
         </div>
         
         <div class="flex items-center gap-3 pt-2">
@@ -528,9 +715,18 @@
   
   <div id="toastContainer"></div>
   
+  <!-- 截止时间到 - 全屏提醒容器 -->
+  <div id="deadlineAlertContainer"></div>
+  
   <script>
     // ===================== 数据层 =====================
-    const STORAGE_KEY = 'priority-matrix-v1';
+    const STORAGE_KEY = 'priority-matrix-v2';
+    
+    // 生成带时间的截止时间（小时后）
+    function hoursFromNow(h) {
+      const d = new Date(Date.now() + h * 3600000);
+      return d.toISOString().slice(0, 19);
+    }
     
     const defaultTasks = [
       {
@@ -538,7 +734,7 @@
         description: '用户反馈在 Safari 16 上访问 /login 时白屏，控制台报 SyntaxError。需要检查构建产物的 target 配置并增加兼容性 polyfill。',
         type: 'bug', priority: 'P0', status: 'in-progress',
         createdAt: Date.now() - 86400000 * 1.2, completedAt: null,
-        dueDate: new Date(Date.now() + 86400000 * 1).toISOString().split('T')[0],
+        dueDate: hoursFromNow(2),
         tags: ['前端', '紧急', '生产环境']
       },
       {
@@ -546,7 +742,7 @@
         description: '压测时发现连接池在 500 QPS 时被耗尽，需要调整池大小配置或引入连接复用策略。',
         type: 'bug', priority: 'P0', status: 'pending',
         createdAt: Date.now() - 86400000 * 0.5, completedAt: null,
-        dueDate: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
+        dueDate: hoursFromNow(48),
         tags: ['后端', '数据库', '性能']
       },
       {
@@ -554,7 +750,7 @@
         description: '对接支付宝与微信支付 API，包含下单、回调、对账三个核心流程。需要与财务确认对账逻辑。',
         type: 'feature', priority: 'P1', status: 'in-progress',
         createdAt: Date.now() - 86400000 * 3, completedAt: null,
-        dueDate: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0],
+        dueDate: hoursFromNow(120),
         tags: ['支付', 'API']
       },
       {
@@ -562,7 +758,7 @@
         description: '部分用户反馈未收到注册激活邮件，怀疑是邮件队列堆积。需排查 SES 配置与队列消费速度。',
         type: 'bug', priority: 'P1', status: 'pending',
         createdAt: Date.now() - 86400000 * 2, completedAt: null,
-        dueDate: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
+        dueDate: hoursFromNow(72),
         tags: ['邮件', '队列']
       },
       {
@@ -570,7 +766,7 @@
         description: '当前 LCP 为 2.8s，需要通过图片懒加载、关键 CSS 内联、JS 分包等方式优化到 1.5s 以下。',
         type: 'optimize', priority: 'P2', status: 'pending',
         createdAt: Date.now() - 86400000 * 4, completedAt: null,
-        dueDate: new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0],
+        dueDate: hoursFromNow(168),
         tags: ['性能', 'SEO']
       },
       {
@@ -578,7 +774,7 @@
         description: '用户调研显示 60% 用户希望支持深色模式，需设计 token 系统并适配所有页面。',
         type: 'feature', priority: 'P2', status: 'pending',
         createdAt: Date.now() - 86400000 * 5, completedAt: null,
-        dueDate: new Date(Date.now() + 86400000 * 10).toISOString().split('T')[0],
+        dueDate: hoursFromNow(240),
         tags: ['UI', '体验']
       },
       {
@@ -586,7 +782,7 @@
         description: '当前 utils 目录测试覆盖率仅 32%，需要补充到 80% 以上。',
         type: 'task', priority: 'P2', status: 'pending',
         createdAt: Date.now() - 86400000 * 6, completedAt: null,
-        dueDate: new Date(Date.now() + 86400000 * 8).toISOString().split('T')[0],
+        dueDate: hoursFromNow(192),
         tags: ['测试']
       },
       {
@@ -603,13 +799,12 @@
         createdAt: Date.now() - 86400000 * 8, completedAt: null, dueDate: null,
         tags: ['文档']
       },
-      // 已完成（历史记录）
       {
         id: 'demo-h1', title: '修复用户头像上传失败问题',
         description: 'CDN 配置错误导致头像上传 403，已联系运维修复配置。',
         type: 'bug', priority: 'P0', status: 'completed',
         createdAt: Date.now() - 86400000 * 4, completedAt: Date.now() - 86400000 * 0.2,
-        dueDate: new Date(Date.now() - 86400000 * 0.5).toISOString().split('T')[0],
+        dueDate: hoursFromNow(-12),
         tags: ['CDN', '紧急']
       },
       {
@@ -617,7 +812,7 @@
         description: '新版详情页上线，转化率提升 8%。',
         type: 'feature', priority: 'P1', status: 'completed',
         createdAt: Date.now() - 86400000 * 14, completedAt: Date.now() - 86400000 * 1.5,
-        dueDate: new Date(Date.now() - 86400000 * 1).toISOString().split('T')[0],
+        dueDate: hoursFromNow(-24),
         tags: ['UI', '转化']
       },
       {
@@ -641,10 +836,22 @@
     let modalState = { type: 'task', priority: 'P2' };
     let sortMode = 'priority';
     
+    // 已提醒记录（防止重复提醒）
+    const reminded30min = new Set();
+    const alertedDeadline = new Set();
+    
     function loadData() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        try { tasks = JSON.parse(stored); }
+        try { 
+          tasks = JSON.parse(stored);
+          // 兼容旧数据：将纯日期格式转为带时间的格式
+          tasks.forEach(t => {
+            if (t.dueDate && /^\d{4}-\d{2}-\d{2}$/.test(t.dueDate)) {
+              t.dueDate = t.dueDate + 'T23:59:59';
+            }
+          });
+        }
         catch (e) { tasks = [...defaultTasks]; }
       } else {
         tasks = [...defaultTasks];
@@ -660,21 +867,59 @@
       return 't-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
     }
     
+    // 将 datetime-local 字符串转为时间戳
+    function parseDueDate(dueStr) {
+      if (!dueStr) return null;
+      const d = new Date(dueStr);
+      return isNaN(d.getTime()) ? null : d.getTime();
+    }
+    
+    // 格式化截止时间显示（带时分秒和倒计时）
     function formatDate(ts) {
-      if (!ts) return '无截止日期';
+      if (!ts) return '无截止时间';
       const d = new Date(ts);
       const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      const dueDay = new Date(d);
-      dueDay.setHours(0, 0, 0, 0);
-      const diff = dueDay - now;
-      const days = Math.round(diff / 86400000);
+      const diff = d.getTime() - now.getTime();
+      const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+      const timeStrFull = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
       const dateStr = `${d.getMonth() + 1}月${d.getDate()}日`;
-      if (days < 0) return `已逾期 ${Math.abs(days)} 天 · ${dateStr}`;
-      if (days === 0) return '今日截止';
-      if (days === 1) return '明日截止';
-      if (days < 7) return `${days} 天后 · ${dateStr}`;
-      return dateStr;
+      
+      // 已过期
+      if (diff < 0) {
+        const absDiff = Math.abs(diff);
+        if (absDiff < 60000) return `刚刚截止 · ${timeStr}`;
+        if (absDiff < 3600000) return `已逾期 ${Math.floor(absDiff/60000)} 分钟 · ${timeStr}`;
+        if (absDiff < 86400000) return `已逾期 ${Math.floor(absDiff/3600000)} 小时 · ${timeStr}`;
+        return `已逾期 ${Math.floor(absDiff/86400000)} 天 · ${dateStr}`;
+      }
+      
+      // 30分钟内 - 紧急
+      if (diff < 30 * 60 * 1000) {
+        const mins = Math.floor(diff / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+        return `⚠ ${mins}分${secs.toString().padStart(2,'0')}秒后截止 · ${timeStrFull}`;
+      }
+      
+      // 今日内
+      const isToday = d.toDateString() === now.toDateString();
+      if (isToday) {
+        if (diff < 3600000) return `今日 ${Math.floor(diff/60000)} 分钟后 · ${timeStr}`;
+        return `今日 ${timeStr} · ${Math.floor(diff/3600000)} 小时后`;
+      }
+      
+      // 明日
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      if (d.toDateString() === tomorrow.toDateString()) {
+        return `明日 ${timeStr}`;
+      }
+      
+      // 7天内
+      if (diff < 7 * 86400000) {
+        return `${dateStr} ${timeStr}`;
+      }
+      
+      return `${dateStr} ${timeStr}`;
     }
     
     function formatHistoryTime(ts) {
@@ -693,9 +938,18 @@
     
     function isOverdue(task) {
       if (!task.dueDate || task.status === 'completed') return false;
-      const due = new Date(task.dueDate);
-      due.setHours(23, 59, 59, 999);
-      return due < new Date();
+      const due = parseDueDate(task.dueDate);
+      if (!due) return false;
+      return due < Date.now();
+    }
+    
+    // 是否在30分钟内即将截止
+    function isUrgent(task) {
+      if (!task.dueDate || task.status === 'completed') return false;
+      const due = parseDueDate(task.dueDate);
+      if (!due) return false;
+      const diff = due - Date.now();
+      return diff > 0 && diff <= 30 * 60 * 1000;
     }
     
     function escapeHtml(s) {
@@ -722,11 +976,12 @@
       today.setHours(0, 0, 0, 0);
       const todayCompleted = tasks.filter(t => t.status === 'completed' && t.completedAt && t.completedAt >= today.getTime());
       const totalCompleted = tasks.filter(t => t.status === 'completed');
+      const urgentCount = active.filter(t => isUrgent(t)).length;
       
       const stats = [
         { label: '活动任务', value: active.length, icon: 'fa-list-check', color: 'var(--accent)' },
         { label: 'P0 紧急', value: p0.length, icon: 'fa-fire', color: 'var(--p0)', pulse: p0.length > 0 },
-        { label: '处理中', value: inProgress.length, icon: 'fa-spinner', color: 'var(--p1)' },
+        { label: '即将截止', value: urgentCount, icon: 'fa-bell', color: 'var(--p1)', pulse: urgentCount > 0 },
         { label: '今日完成', value: todayCompleted.length, icon: 'fa-check', color: 'var(--mint)' },
         { label: '累计完成', value: totalCompleted.length, icon: 'fa-trophy', color: 'var(--p2)' }
       ];
@@ -796,7 +1051,7 @@
       const sortFn = sortMode === 'createdAt' 
         ? (a, b) => b.createdAt - a.createdAt
         : sortMode === 'dueDate'
-        ? (a, b) => (a.dueDate ? new Date(a.dueDate).getTime() : Infinity) - (b.dueDate ? new Date(b.dueDate).getTime() : Infinity)
+        ? (a, b) => (a.dueDate ? parseDueDate(a.dueDate) : Infinity) - (b.dueDate ? parseDueDate(b.dueDate) : Infinity)
         : (a, b) => a.createdAt - b.createdAt;
       
       Object.keys(groups).forEach(k => groups[k].sort(sortFn));
@@ -842,11 +1097,17 @@
       };
       const tm = typeMeta[t.type] || typeMeta.task;
       const overdue = isOverdue(t);
+      const urgent = isUrgent(t);
       const pColor = `var(--${t.priority.toLowerCase()})`;
       const isP0 = t.priority === 'P0';
       
+      let cardClass = 'task-card glass rounded-xl p-4 flex items-start gap-3';
+      if (isP0) cardClass += ' p0-card';
+      if (urgent) cardClass += ' urgent-card';
+      if (overdue) cardClass += ' overdue-now';
+      
       return `
-        <div class="task-card glass rounded-xl p-4 flex items-start gap-3 ${isP0 ? 'p0-card' : ''}" data-id="${t.id}">
+        <div class="${cardClass}" data-id="${t.id}">
           <div class="custom-checkbox ${t.status === 'in-progress' ? 'checked' : ''}" onclick="toggleStatus('${t.id}')" title="点击切换状态">
             ${t.status === 'in-progress' ? '<i class="fas fa-check"></i>' : ''}
           </div>
@@ -856,14 +1117,15 @@
               <span class="type-badge ${tm.class}"><i class="fas ${tm.icon}"></i> ${tm.label}</span>
               <span class="text-[10px] mono px-1.5 py-0.5 rounded font-bold" style="background: ${pColor}20; color: ${pColor}">${t.priority}</span>
               ${t.status === 'in-progress' ? '<span class="text-[10px] mono px-1.5 py-0.5 rounded bg-[var(--p1)]/15 text-[var(--p1)]"><i class="fas fa-spinner text-[8px] mr-1"></i>处理中</span>' : ''}
-              ${overdue ? '<span class="text-[10px] mono px-1.5 py-0.5 rounded bg-[var(--p0)]/15 text-[var(--p0)]"><i class="fas fa-exclamation-triangle text-[8px] mr-1"></i>已逾期</span>' : ''}
+              ${urgent ? '<span class="text-[10px] mono px-1.5 py-0.5 rounded bg-[var(--p1)]/20 text-[var(--p1)] urgent-blink"><i class="fas fa-bell text-[8px] mr-1"></i>即将截止</span>' : ''}
+              ${overdue ? '<span class="text-[10px] mono px-1.5 py-0.5 rounded bg-[var(--p0)]/15 text-[var(--p0)] urgent-blink"><i class="fas fa-exclamation-triangle text-[8px] mr-1"></i>已逾期</span>' : ''}
             </div>
             <div class="font-semibold text-sm mb-1 leading-snug">${escapeHtml(t.title)}</div>
             ${t.description ? `<div class="text-xs text-[var(--fg-muted)] leading-relaxed mb-2 line-clamp-2">${escapeHtml(t.description)}</div>` : ''}
             <div class="flex items-center gap-2 flex-wrap text-[11px] text-[var(--fg-muted)]">
-              <span class="flex items-center gap-1">
+              <span class="flex items-center gap-1 ${urgent || overdue ? 'font-medium' : ''}" style="${urgent ? 'color: var(--p1)' : ''}${overdue ? 'color: var(--p0)' : ''}">
                 <i class="far fa-clock"></i>
-                <span class="${overdue ? 'text-[var(--p0)] font-medium' : ''}">${formatDate(t.dueDate ? new Date(t.dueDate).getTime() : null)}</span>
+                <span class="mono">${formatDate(parseDueDate(t.dueDate))}</span>
               </span>
               ${(t.tags || []).slice(0, 3).map(tag => `<span class="px-1.5 py-0.5 rounded bg-white/5">${escapeHtml(tag)}</span>`).join('')}
             </div>
@@ -988,6 +1250,9 @@
       } else if (t.status === 'in-progress') {
         t.status = 'completed';
         t.completedAt = Date.now();
+        // 完成后清除提醒记录
+        reminded30min.delete(t.id);
+        alertedDeadline.delete(t.id);
         showToast('任务已完成', 'fa-check', 'var(--mint)');
       }
       saveData();
@@ -998,7 +1263,11 @@
       const t = tasks.find(t => t.id === id);
       if (!t) return;
       t.status = status;
-      if (status === 'completed') t.completedAt = Date.now();
+      if (status === 'completed') {
+        t.completedAt = Date.now();
+        reminded30min.delete(t.id);
+        alertedDeadline.delete(t.id);
+      }
       saveData();
       render();
       showToast(status === 'in-progress' ? '已开始处理' : '状态已更新', 'fa-play', 'var(--p1)');
@@ -1009,6 +1278,8 @@
       if (!t) return;
       t.status = 'completed';
       t.completedAt = Date.now();
+      reminded30min.delete(t.id);
+      alertedDeadline.delete(t.id);
       saveData();
       render();
       showToast('任务已完成', 'fa-check', 'var(--mint)');
@@ -1019,6 +1290,8 @@
       if (card) card.classList.add('removing');
       setTimeout(() => {
         tasks = tasks.filter(x => x.id !== id);
+        reminded30min.delete(id);
+        alertedDeadline.delete(id);
         saveData();
         render();
         showToast('任务已删除', 'fa-trash', 'var(--p0)');
@@ -1030,6 +1303,16 @@
       if (!t) return;
       t.status = 'pending';
       t.completedAt = null;
+      // 恢复时如果还来得及，重新允许提醒
+      if (t.dueDate) {
+        const due = parseDueDate(t.dueDate);
+        if (due && due > Date.now() + 30 * 60 * 1000) {
+          reminded30min.delete(id);
+        }
+        if (due && due > Date.now()) {
+          alertedDeadline.delete(id);
+        }
+      }
       saveData();
       render();
       showToast('任务已恢复', 'fa-rotate-left', 'var(--mint)');
@@ -1037,6 +1320,8 @@
     
     function deletePermanently(id) {
       tasks = tasks.filter(t => t.id !== id);
+      reminded30min.delete(id);
+      alertedDeadline.delete(id);
       saveData();
       render();
       showToast('已永久删除', 'fa-times', 'var(--p0)');
@@ -1058,6 +1343,15 @@
       const t = tasks.find(t => t.id === id);
       if (!t) return;
       openModal(t);
+    }
+    
+    // ===================== 快捷设置截止时间 =====================
+    function setQuickDue(hours) {
+      const input = document.getElementById('taskDue');
+      const d = new Date(Date.now() + hours * 3600000);
+      // 格式：YYYY-MM-DDTHH:MM:SS
+      const pad = (n) => n.toString().padStart(2, '0');
+      input.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
     
     // ===================== 模态框 =====================
@@ -1143,17 +1437,24 @@
           t.description = desc;
           t.type = modalState.type;
           t.priority = modalState.priority;
+          const oldDue = t.dueDate;
           t.dueDate = due || null;
           t.tags = tags;
+          // 如果截止时间变了，重置提醒状态
+          if (oldDue !== t.dueDate) {
+            reminded30min.delete(id);
+            alertedDeadline.delete(id);
+          }
         }
         showToast('任务已更新', 'fa-check', 'var(--mint)');
       } else {
-        tasks.unshift({
+        const newTask = {
           id: uuid(), title, description: desc,
           type: modalState.type, priority: modalState.priority,
           status: 'pending', createdAt: Date.now(),
           completedAt: null, dueDate: due || null, tags
-        });
+        };
+        tasks.unshift(newTask);
         showToast('任务已创建', 'fa-plus', 'var(--accent)');
       }
       saveData();
@@ -1205,9 +1506,9 @@
     }
     
     // ===================== Toast =====================
-    function showToast(message, icon = 'fa-check', color = 'var(--mint)') {
+    function showToast(message, icon = 'fa-check', color = 'var(--mint)', isReminder = false) {
       const toast = document.createElement('div');
-      toast.className = 'toast';
+      toast.className = 'toast' + (isReminder ? ' reminder-toast' : '');
       toast.innerHTML = `
         <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: ${color}20">
           <i class="fas ${icon}" style="color: ${color}"></i>
@@ -1215,12 +1516,281 @@
         <div class="text-sm font-medium">${message}</div>
       `;
       document.getElementById('toastContainer').appendChild(toast);
+      const duration = isReminder ? 6000 : 2200;
       setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateX(20px)';
         toast.style.transition = 'all 0.3s';
         setTimeout(() => toast.remove(), 300);
-      }, 2200);
+      }, duration);
+    }
+    
+    // ===================== 通知系统 =====================
+    function updateNotifStatus() {
+      const el = document.getElementById('notifStatus');
+      if (!('Notification' in window)) {
+        el.style.display = 'none';
+        return;
+      }
+      if (Notification.permission === 'granted') {
+        el.innerHTML = `
+          <span class="status-dot bg-[var(--mint)] pulse-dot"></span>
+          <span class="text-xs text-[var(--mint)] font-medium">通知已开启</span>
+        `;
+        el.style.cursor = 'default';
+        el.onclick = null;
+      } else if (Notification.permission === 'denied') {
+        el.innerHTML = `
+          <span class="status-dot bg-[var(--p0)]"></span>
+          <span class="text-xs text-[var(--fg-muted)] font-medium">通知被拒绝</span>
+        `;
+      } else {
+        el.innerHTML = `
+          <span class="status-dot bg-[var(--fg-dim)]"></span>
+          <span class="text-xs text-[var(--fg-muted)] font-medium">通知未开启</span>
+        `;
+      }
+    }
+    
+    function showNotifBanner() {
+      if (!('Notification' in window)) return;
+      if (Notification.permission !== 'default') return;
+      if (localStorage.getItem('notif-banner-dismissed') === '1') return;
+      document.getElementById('notifBanner').style.display = 'flex';
+    }
+    
+    function dismissNotifBanner() {
+      document.getElementById('notifBanner').style.display = 'none';
+      localStorage.setItem('notif-banner-dismissed', '1');
+    }
+    
+    function enableNotifications() {
+      if (!('Notification' in window)) {
+        showToast('您的浏览器不支持通知', 'fa-times', 'var(--p0)');
+        return;
+      }
+      if (Notification.permission === 'granted') {
+        updateNotifStatus();
+        return;
+      }
+      Notification.requestPermission().then(permission => {
+        updateNotifStatus();
+        if (permission === 'granted') {
+          showToast('通知已开启，将在截止前提醒你', 'fa-bell', 'var(--mint)');
+          document.getElementById('notifBanner').style.display = 'none';
+          // 发一个测试通知
+          try {
+            new Notification('通知已开启', { 
+              body: '将在任务截止前 30 分钟收到桌面提醒',
+              silent: false
+            });
+          } catch(e) {}
+        } else if (permission === 'denied') {
+          showToast('通知权限被拒绝，将仅使用页面内提醒', 'fa-info', 'var(--p1)');
+        }
+      });
+    }
+    
+    function sendDesktopNotification(title, body, tag) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      try {
+        const n = new Notification(title, {
+          body: body,
+          tag: tag,
+          requireInteraction: true,
+          silent: false
+        });
+        n.onclick = () => {
+          window.focus();
+          n.close();
+        };
+        // 30秒后自动关闭
+        setTimeout(() => { try { n.close(); } catch(e) {} }, 30000);
+      } catch(e) {
+        console.warn('通知发送失败', e);
+      }
+    }
+    
+    // ===================== 提示音 =====================
+    let audioCtx = null;
+    function playAlertSound(type = 'deadline') {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        if (type === 'reminder') {
+          // 提醒音：两声短促
+          [0, 0.2].forEach(offset => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = 880;
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0, audioCtx.currentTime + offset);
+            gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + offset + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + offset + 0.15);
+            osc.start(audioCtx.currentTime + offset);
+            osc.stop(audioCtx.currentTime + offset + 0.15);
+          });
+        } else {
+          // 截止音：三声紧急
+          [0, 0.25, 0.5].forEach(offset => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = 660;
+            osc.type = 'triangle';
+            gain.gain.setValueAtTime(0, audioCtx.currentTime + offset);
+            gain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + offset + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + offset + 0.2);
+            osc.start(audioCtx.currentTime + offset);
+            osc.stop(audioCtx.currentTime + offset + 0.2);
+          });
+        }
+      } catch(e) {
+        console.warn('音频播放失败', e);
+      }
+    }
+    
+    // ===================== 截止提醒检查 =====================
+    function checkDeadlines() {
+      const now = Date.now();
+      const activeTasks = tasks.filter(t => t.status !== 'completed');
+      
+      activeTasks.forEach(t => {
+        if (!t.dueDate) return;
+        const due = parseDueDate(t.dueDate);
+        if (!due) return;
+        
+        const diff = due - now;
+        
+        // 30分钟前提醒（在 0~30分钟之间且未提醒过）
+        if (diff > 0 && diff <= 30 * 60 * 1000 && !reminded30min.has(t.id)) {
+          reminded30min.add(t.id);
+          const mins = Math.ceil(diff / 60000);
+          const msg = `任务"${t.title}"将在 ${mins} 分钟后截止，请尽快处理！`;
+          
+          // 桌面通知
+          sendDesktopNotification('⏰ 即将截止提醒', msg, 'reminder-' + t.id);
+          
+          // 页面内 Toast
+          showToast(`⏰ ${mins} 分钟后截止：${t.title}`, 'fa-bell', 'var(--p1)', true);
+          
+          // 提示音
+          playAlertSound('reminder');
+          
+          // 刷新列表（显示紧急状态）
+          render();
+        }
+        
+        // 截止时间到
+        if (diff <= 0 && !alertedDeadline.has(t.id)) {
+          alertedDeadline.add(t.id);
+          triggerDeadlineAlert(t);
+        }
+      });
+      
+      // 每分钟刷新一次列表（更新倒计时显示）
+      if (now % 60000 < 5000) {
+        render();
+      }
+    }
+    
+    // ===================== 截止时间到的全屏动画提醒 =====================
+    function triggerDeadlineAlert(task) {
+      // 桌面通知
+      sendDesktopNotification('🚨 任务已截止', `任务"${task.title}"已到达截止时间！`, 'deadline-' + task.id);
+      
+      // 提示音
+      playAlertSound('deadline');
+      
+      // 页面内 Toast
+      showToast(`🚨 已截止：${task.title}`, 'fa-exclamation-circle', 'var(--p0)', true);
+      
+      // 全屏动画
+      const container = document.getElementById('deadlineAlertContainer');
+      const overlay = document.createElement('div');
+      overlay.className = 'deadline-overlay';
+      overlay.dataset.taskId = task.id;
+      overlay.innerHTML = `
+        <div class="deadline-modal">
+          <div class="deadline-icon-ring">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="deadline-title">时间到了！</div>
+          <div class="deadline-task-name">${escapeHtml(task.title)}</div>
+          <div class="deadline-desc">
+            <span style="color: var(--p0); font-weight: 600;">${task.priority}</span>
+            · 该任务已到达截止时间
+          </div>
+          <div class="deadline-actions">
+            <button class="deadline-btn ghost" onclick="snoozeDeadline('${task.id}')">
+              <i class="fas fa-clock"></i> 延后 10 分钟
+            </button>
+            <button class="deadline-btn primary" onclick="completeFromAlert('${task.id}')">
+              <i class="fas fa-check"></i> 标记完成
+            </button>
+          </div>
+          <button class="absolute top-4 right-4 w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center text-[var(--fg-muted)] transition" onclick="dismissDeadlineAlert('${task.id}')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      `;
+      container.appendChild(overlay);
+      
+      // 持续提示音（每5秒一次，最多3次）
+      let soundCount = 1;
+      const soundInterval = setInterval(() => {
+        if (soundCount < 3) {
+          playAlertSound('deadline');
+          soundCount++;
+        } else {
+          clearInterval(soundInterval);
+        }
+      }, 5000);
+      
+      // 30秒后自动消失（如果用户没操作）
+      setTimeout(() => {
+        if (document.querySelector(`.deadline-overlay[data-task-id="${task.id}"]`)) {
+          dismissDeadlineAlert(task.id);
+        }
+      }, 30000);
+    }
+    
+    function dismissDeadlineAlert(taskId) {
+      const overlay = document.querySelector(`.deadline-overlay[data-task-id="${taskId}"]`);
+      if (overlay) {
+        overlay.style.transition = 'opacity 0.3s';
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 300);
+      }
+    }
+    
+    function completeFromAlert(taskId) {
+      completeTask(taskId);
+      dismissDeadlineAlert(taskId);
+    }
+    
+    function snoozeDeadline(taskId) {
+      const t = tasks.find(t => t.id === taskId);
+      if (!t) return;
+      // 延后10分钟
+      const newDue = new Date(Date.now() + 10 * 60 * 1000);
+      const pad = (n) => n.toString().padStart(2, '0');
+      t.dueDate = `${newDue.getFullYear()}-${pad(newDue.getMonth()+1)}-${pad(newDue.getDate())}T${pad(newDue.getHours())}:${pad(newDue.getMinutes())}:${pad(newDue.getSeconds())}`;
+      // 允许重新提醒
+      reminded30min.delete(taskId);
+      alertedDeadline.delete(taskId);
+      saveData();
+      render();
+      dismissDeadlineAlert(taskId);
+      showToast('已延后 10 分钟', 'fa-clock', 'var(--p1)');
     }
     
     // ===================== 导出 =====================
@@ -1250,7 +1820,23 @@
     loadData();
     render();
     updateClock();
+    updateNotifStatus();
     setInterval(updateClock, 1000);
+    
+    // 每 5 秒检查一次截止时间
+    setInterval(checkDeadlines, 5000);
+    // 页面加载后立即检查一次
+    setTimeout(checkDeadlines, 1000);
+    
+    // 显示通知权限提示条
+    setTimeout(showNotifBanner, 1500);
+    
+    // 页面可见性变化时重新检查
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        checkDeadlines();
+      }
+    });
     
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeModal();
