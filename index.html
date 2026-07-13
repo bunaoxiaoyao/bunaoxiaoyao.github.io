@@ -891,7 +891,7 @@
       
       const isToday = d.toDateString() === now.toDateString();
       if (isToday) {
-        if (diff < 3600000) return `今日 ${Math.floor(diff/60000)} 分钟后 · ${timeStr}`;
+        if (diff < 3600000) return `今日 ${timeStr} · ${Math.floor(diff/60000)} 分钟后`;
         return `今日 ${timeStr} · ${Math.floor(diff/3600000)} 小时后`;
       }
       
@@ -1078,6 +1078,9 @@
           </div>
         `;
       }).join('');
+      
+      // 渲染后立即更新一次实时时间
+      updateLiveTimes();
     }
     
     function renderTaskCard(t) {
@@ -1115,9 +1118,9 @@
             <div class="font-semibold text-sm mb-1 leading-snug">${escapeHtml(t.title)}</div>
             ${t.description ? `<div class="text-xs text-[var(--fg-muted)] leading-relaxed mb-2 line-clamp-2">${escapeHtml(t.description)}</div>` : ''}
             <div class="flex items-center gap-2 flex-wrap text-[11px] text-[var(--fg-muted)]">
-              <span class="flex items-center gap-1 ${urgent || overdue ? 'font-medium' : ''}" style="${urgent ? 'color: var(--p1)' : ''}${overdue ? 'color: var(--p0)' : ''}">
+              <span class="flex items-center gap-1 ${urgent || overdue ? 'font-medium' : ''} ${urgent ? 'text-[var(--p1)]' : ''} ${overdue ? 'text-[var(--p0)]' : ''}">
                 <i class="far fa-clock"></i>
-                <span class="mono">${formatDate(parseDueDate(t.dueDate))}</span>
+                <span class="mono task-due-text" data-due="${t.dueDate || ''}">${formatDate(parseDueDate(t.dueDate))}</span>
               </span>
               ${(t.tags || []).slice(0, 3).map(tag => `<span class="px-1.5 py-0.5 rounded bg-white/5">${escapeHtml(tag)}</span>`).join('')}
             </div>
@@ -1647,36 +1650,53 @@
       }
     }
     
-    function checkDeadlines() {
+    // ===================== 实时更新与状态检查 =====================
+    function updateLiveTimes() {
+      // 局部更新时间文本，避免全局重绘打断用户交互（如 hover 效果、输入框焦点）
+      document.querySelectorAll('.task-due-text').forEach(el => {
+        const dueStr = el.dataset.due;
+        const newText = formatDate(parseDueDate(dueStr));
+        if (el.innerText !== newText) {
+          el.innerText = newText;
+        }
+      });
+    }
+
+    function tick() {
       const now = Date.now();
-      const activeTasks = tasks.filter(t => t.status !== 'completed');
-      
-      activeTasks.forEach(t => {
-        if (!t.dueDate) return;
+      let needRender = false;
+
+      tasks.forEach(t => {
+        if (t.status === 'completed' || !t.dueDate) return;
         const due = parseDueDate(t.dueDate);
         if (!due) return;
-        
         const diff = due - now;
-        
+
+        // 进入 30 分钟内提醒区间
         if (diff > 0 && diff <= 30 * 60 * 1000 && !reminded30min.has(t.id)) {
           reminded30min.add(t.id);
           const mins = Math.ceil(diff / 60000);
           const msg = `任务"${t.title}"将在 ${mins} 分钟后截止，请尽快处理！`;
-          
           sendDesktopNotification('⏰ 即将截止提醒', msg, 'reminder-' + t.id);
           showToast(`⏰ ${mins} 分钟后截止：${t.title}`, 'fa-bell', 'var(--p1)', true);
           playAlertSound('reminder');
-          render();
+          needRender = true; // 状态改变，需要重绘以添加紧急边框
         }
-        
+
+        // 正式逾期
         if (diff <= 0 && !alertedDeadline.has(t.id)) {
           alertedDeadline.add(t.id);
           triggerDeadlineAlert(t);
+          needRender = true; // 状态改变，需要重绘以添加逾期边框
         }
       });
-      
-      if (now % 60000 < 5000) {
-        render();
+
+      // 每秒更新时间文本
+      updateLiveTimes();
+
+      // 仅在状态发生关键变化时重绘任务列表
+      if (needRender) {
+        renderTaskList();
       }
     }
     
@@ -1795,13 +1815,16 @@
     updateClock();
     updateNotifStatus();
     setInterval(updateClock, 1000);
-    setInterval(checkDeadlines, 5000);
-    setTimeout(checkDeadlines, 1000);
+    
+    // 每秒执行一次时间更新与状态检查
+    setInterval(tick, 1000);
+    setTimeout(tick, 1000);
+    
     setTimeout(showNotifBanner, 1500);
     
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) {
-        checkDeadlines();
+        tick();
       }
     });
     
